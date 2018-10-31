@@ -104,3 +104,5 @@ namespace MortgageInvestmentSimulator
         public static TimeSpan operator -(MonthYear left, MonthYear right) => (DateTime)left - (DateTime)right;
     }
 }
+
+// TODO: 

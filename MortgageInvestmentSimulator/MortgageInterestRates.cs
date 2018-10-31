@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 
 namespace MortgageInvestmentSimulator
 {
+    [PublicAPI]
     public sealed class MortgageInterestRates
     {
         private static readonly Dictionary<MonthYear, MortgageInterestRate> _thirtyYearRates = new Dictionary<MonthYear, MortgageInterestRate>

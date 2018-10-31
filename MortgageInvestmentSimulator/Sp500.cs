@@ -27,3 +27,5 @@ namespace MortgageInvestmentSimulator
         public decimal PurchasePrice { get; set; }
     }
 }
+
+// TODO: 

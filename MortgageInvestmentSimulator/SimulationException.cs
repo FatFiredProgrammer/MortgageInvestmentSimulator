@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
+using JetBrains.Annotations;
 
 namespace MortgageInvestmentSimulator
 {
     /// <summary></summary>
+    [PublicAPI]
     [Serializable]
     public sealed class SimulationException : Exception
     {
@@ -37,8 +39,8 @@ namespace MortgageInvestmentSimulator
         }
 
         /// <summary>
-        ///    This member supports the .NET Framework infrastructure and is not intended to
-        ///    be used directly from your code.
+        ///     This member supports the .NET Framework infrastructure and is not intended to
+        ///     be used directly from your code.
         /// </summary>
         /// <param name="info">Serialization information.</param>
         /// <param name="context">Streaming data context.</param>

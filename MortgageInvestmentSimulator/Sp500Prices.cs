@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using JetBrains.Annotations;
 
 namespace MortgageInvestmentSimulator
 {
+    [PublicAPI]
     public static class Sp500Prices
     {
         private static readonly Dictionary<MonthYear, Sp500Price> _rates = new Dictionary<MonthYear, Sp500Price>
@@ -599,3 +601,5 @@ namespace MortgageInvestmentSimulator
             => _rates.TryGetValue(monthYear, out var price) ? price : throw new SimulationException($"No S&P 500 price data for {monthYear}");
     }
 }
+
+// TODO: 

@@ -7,13 +7,15 @@ namespace MortgageInvestmentSimulator
     /// </summary>
     internal class Program
     {
+        /// <summary>
+        ///     Defines the entry point of the application.
+        /// </summary>
         private static void Main()
         {
             IOutput output = new ConsoleOutput();
             try
             {
                 var scenario = new Scenario();
-
                 var simulator = new Simulator(output);
                 simulator.Run(scenario);
             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using JetBrains.Annotations;
 
 namespace MortgageInvestmentSimulator
 {
@@ -7,6 +8,7 @@ namespace MortgageInvestmentSimulator
     ///     Output to console/debug.
     ///     Our standard output method.
     /// </summary>
+    [PublicAPI]
     public sealed class ConsoleOutput : IOutput
     {
         /// <inheritdoc />

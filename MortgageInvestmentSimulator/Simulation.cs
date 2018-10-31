@@ -299,7 +299,7 @@ namespace MortgageInvestmentSimulator
             var mortgage = _financials.Mortgage;
             _financials.Mortgage = null;
 
-            TakeOutMortgage(mortgage.Balance * (1+scenario.OriginationFee), scenario, now);
+            TakeOutMortgage(mortgage.Balance, scenario, now);
         }
 
         public void Run(Scenario scenario, MonthYear start)
@@ -450,7 +450,7 @@ namespace MortgageInvestmentSimulator
                 return;
 
             // origination fee
-
+            // *(1 + scenario.OriginationFee)
             _financials.Mortgage.Amount = _financials.Mortgage.Balance = amount;
             switch (scenario.MortgageTerm)
             {
@@ -482,3 +482,5 @@ namespace MortgageInvestmentSimulator
         }
     }
 }
+
+// TODO: 

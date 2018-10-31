@@ -53,3 +53,5 @@ namespace MortgageInvestmentSimulator
             => futureValue * (1 - interestRate / 12);
     }
 }
+
+// TODO: 
