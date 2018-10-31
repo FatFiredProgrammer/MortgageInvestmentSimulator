@@ -29,13 +29,14 @@ namespace MortgageInvestmentSimulator
         /// <value>The maturity.</value>
         public MonthYear Maturity { get; set; }
 
-        public decimal GetFaceValue(MonthYear now, decimal interestRate)
+        public decimal GetFaceValue(MonthYear now)
         {
             if (IsMatured(now))
                 return Par;
 
+            var rate = TreasuryInterestRates.GetRate(now);
             var months = MonthYear.MonthDifference(Maturity, now);
-            return GetPresentValue(Par, interestRate, (decimal)months / 12);
+            return GetPresentValue(Par, rate.InterestRate, (decimal)months / 12);
         }
 
         /// <summary>

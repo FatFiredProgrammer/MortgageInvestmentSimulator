@@ -8,7 +8,6 @@ namespace MortgageInvestmentSimulator
     {
         private static readonly Dictionary<MonthYear, Sp500Price> _rates = new Dictionary<MonthYear, Sp500Price>
         {
-            { new MonthYear(10, 2018), new Sp500Price(10, 2018, 2724.7m) },
             { new MonthYear(10, 2018), new Sp500Price(10, 2018, 2924.59m) },
             { new MonthYear(9, 2018), new Sp500Price(9, 2018, 2896.72m) },
             { new MonthYear(8, 2018), new Sp500Price(8, 2018, 2857.82m) },
@@ -19,6 +18,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 2018), new Sp500Price(3, 2018, 2702.77m) },
             { new MonthYear(2, 2018), new Sp500Price(2, 2018, 2705.16m) },
             { new MonthYear(1, 2018), new Sp500Price(1, 2018, 2789.8m) },
+
             { new MonthYear(12, 2017), new Sp500Price(12, 2017, 2664.34m) },
             { new MonthYear(11, 2017), new Sp500Price(11, 2017, 2593.61m) },
             { new MonthYear(10, 2017), new Sp500Price(10, 2017, 2557m) },
@@ -31,6 +31,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 2017), new Sp500Price(3, 2017, 2366.82m) },
             { new MonthYear(2, 2017), new Sp500Price(2, 2017, 2329.91m) },
             { new MonthYear(1, 2017), new Sp500Price(1, 2017, 2275.12m) },
+
             { new MonthYear(12, 2016), new Sp500Price(12, 2016, 2246.63m) },
             { new MonthYear(11, 2016), new Sp500Price(11, 2016, 2164.99m) },
             { new MonthYear(10, 2016), new Sp500Price(10, 2016, 2143.02m) },
@@ -43,6 +44,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 2016), new Sp500Price(3, 2016, 2021.95m) },
             { new MonthYear(2, 2016), new Sp500Price(2, 2016, 1904.42m) },
             { new MonthYear(1, 2016), new Sp500Price(1, 2016, 1918.6m) },
+
             { new MonthYear(12, 2015), new Sp500Price(12, 2015, 2054.08m) },
             { new MonthYear(11, 2015), new Sp500Price(11, 2015, 2080.62m) },
             { new MonthYear(10, 2015), new Sp500Price(10, 2015, 2024.81m) },
@@ -55,6 +57,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 2015), new Sp500Price(3, 2015, 2079.99m) },
             { new MonthYear(2, 2015), new Sp500Price(2, 2015, 2082.2m) },
             { new MonthYear(1, 2015), new Sp500Price(1, 2015, 2028.18m) },
+
             { new MonthYear(12, 2014), new Sp500Price(12, 2014, 2054.27m) },
             { new MonthYear(11, 2014), new Sp500Price(11, 2014, 2044.57m) },
             { new MonthYear(10, 2014), new Sp500Price(10, 2014, 1937.27m) },
@@ -67,6 +70,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 2014), new Sp500Price(3, 2014, 1863.52m) },
             { new MonthYear(2, 2014), new Sp500Price(2, 2014, 1817.04m) },
             { new MonthYear(1, 2014), new Sp500Price(1, 2014, 1822.36m) },
+
             { new MonthYear(12, 2013), new Sp500Price(12, 2013, 1807.78m) },
             { new MonthYear(11, 2013), new Sp500Price(11, 2013, 1783.54m) },
             { new MonthYear(10, 2013), new Sp500Price(10, 2013, 1720.03m) },
@@ -79,6 +83,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 2013), new Sp500Price(3, 2013, 1550.83m) },
             { new MonthYear(2, 2013), new Sp500Price(2, 2013, 1512.31m) },
             { new MonthYear(1, 2013), new Sp500Price(1, 2013, 1480.4m) },
+
             { new MonthYear(12, 2012), new Sp500Price(12, 2012, 1422.29m) },
             { new MonthYear(11, 2012), new Sp500Price(11, 2012, 1394.51m) },
             { new MonthYear(10, 2012), new Sp500Price(10, 2012, 1437.82m) },
@@ -91,6 +96,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 2012), new Sp500Price(3, 2012, 1389.24m) },
             { new MonthYear(2, 2012), new Sp500Price(2, 2012, 1352.49m) },
             { new MonthYear(1, 2012), new Sp500Price(1, 2012, 1300.58m) },
+
             { new MonthYear(12, 2011), new Sp500Price(12, 2011, 1243.32m) },
             { new MonthYear(11, 2011), new Sp500Price(11, 2011, 1226.42m) },
             { new MonthYear(10, 2011), new Sp500Price(10, 2011, 1207.22m) },
@@ -103,6 +109,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 2011), new Sp500Price(3, 2011, 1304.49m) },
             { new MonthYear(2, 2011), new Sp500Price(2, 2011, 1321.12m) },
             { new MonthYear(1, 2011), new Sp500Price(1, 2011, 1282.62m) },
+
             { new MonthYear(12, 2010), new Sp500Price(12, 2010, 1241.53m) },
             { new MonthYear(11, 2010), new Sp500Price(11, 2010, 1198.89m) },
             { new MonthYear(10, 2010), new Sp500Price(10, 2010, 1171.58m) },
@@ -115,6 +122,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 2010), new Sp500Price(3, 2010, 1152.05m) },
             { new MonthYear(2, 2010), new Sp500Price(2, 2010, 1089.16m) },
             { new MonthYear(1, 2010), new Sp500Price(1, 2010, 1123.58m) },
+
             { new MonthYear(12, 2009), new Sp500Price(12, 2009, 1110.38m) },
             { new MonthYear(11, 2009), new Sp500Price(11, 2009, 1088.07m) },
             { new MonthYear(10, 2009), new Sp500Price(10, 2009, 1067.66m) },
@@ -127,6 +135,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 2009), new Sp500Price(3, 2009, 757.13m) },
             { new MonthYear(2, 2009), new Sp500Price(2, 2009, 805.23m) },
             { new MonthYear(1, 2009), new Sp500Price(1, 2009, 865.58m) },
+
             { new MonthYear(12, 2008), new Sp500Price(12, 2008, 877.56m) },
             { new MonthYear(11, 2008), new Sp500Price(11, 2008, 883.04m) },
             { new MonthYear(10, 2008), new Sp500Price(10, 2008, 968.8m) },
@@ -139,6 +148,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 2008), new Sp500Price(3, 2008, 1316.94m) },
             { new MonthYear(2, 2008), new Sp500Price(2, 2008, 1354.87m) },
             { new MonthYear(1, 2008), new Sp500Price(1, 2008, 1378.76m) },
+
             { new MonthYear(12, 2007), new Sp500Price(12, 2007, 1479.22m) },
             { new MonthYear(11, 2007), new Sp500Price(11, 2007, 1463.39m) },
             { new MonthYear(10, 2007), new Sp500Price(10, 2007, 1539.66m) },
@@ -151,6 +161,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 2007), new Sp500Price(3, 2007, 1406.95m) },
             { new MonthYear(2, 2007), new Sp500Price(2, 2007, 1444.8m) },
             { new MonthYear(1, 2007), new Sp500Price(1, 2007, 1424.16m) },
+
             { new MonthYear(12, 2006), new Sp500Price(12, 2006, 1416.42m) },
             { new MonthYear(11, 2006), new Sp500Price(11, 2006, 1388.64m) },
             { new MonthYear(10, 2006), new Sp500Price(10, 2006, 1363.38m) },
@@ -163,6 +174,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 2006), new Sp500Price(3, 2006, 1293.74m) },
             { new MonthYear(2, 2006), new Sp500Price(2, 2006, 1276.65m) },
             { new MonthYear(1, 2006), new Sp500Price(1, 2006, 1278.73m) },
+
             { new MonthYear(12, 2005), new Sp500Price(12, 2005, 1262.07m) },
             { new MonthYear(11, 2005), new Sp500Price(11, 2005, 1237.37m) },
             { new MonthYear(10, 2005), new Sp500Price(10, 2005, 1191.96m) },
@@ -175,6 +187,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 2005), new Sp500Price(3, 2005, 1194.9m) },
             { new MonthYear(2, 2005), new Sp500Price(2, 2005, 1199.63m) },
             { new MonthYear(1, 2005), new Sp500Price(1, 2005, 1181.41m) },
+
             { new MonthYear(12, 2004), new Sp500Price(12, 2004, 1199.21m) },
             { new MonthYear(11, 2004), new Sp500Price(11, 2004, 1168.94m) },
             { new MonthYear(10, 2004), new Sp500Price(10, 2004, 1117.21m) },
@@ -187,6 +200,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 2004), new Sp500Price(3, 2004, 1123.98m) },
             { new MonthYear(2, 2004), new Sp500Price(2, 2004, 1143.36m) },
             { new MonthYear(1, 2004), new Sp500Price(1, 2004, 1132.52m) },
+
             { new MonthYear(12, 2003), new Sp500Price(12, 2003, 1080.64m) },
             { new MonthYear(11, 2003), new Sp500Price(11, 2003, 1049.9m) },
             { new MonthYear(10, 2003), new Sp500Price(10, 2003, 1038.73m) },
@@ -199,6 +213,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 2003), new Sp500Price(3, 2003, 846.63m) },
             { new MonthYear(2, 2003), new Sp500Price(2, 2003, 837.03m) },
             { new MonthYear(1, 2003), new Sp500Price(1, 2003, 895.84m) },
+
             { new MonthYear(12, 2002), new Sp500Price(12, 2002, 899.18m) },
             { new MonthYear(11, 2002), new Sp500Price(11, 2002, 909.93m) },
             { new MonthYear(10, 2002), new Sp500Price(10, 2002, 854.63m) },
@@ -211,6 +226,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 2002), new Sp500Price(3, 2002, 1153.79m) },
             { new MonthYear(2, 2002), new Sp500Price(2, 2002, 1100.67m) },
             { new MonthYear(1, 2002), new Sp500Price(1, 2002, 1140.21m) },
+
             { new MonthYear(12, 2001), new Sp500Price(12, 2001, 1144.93m) },
             { new MonthYear(11, 2001), new Sp500Price(11, 2001, 1129.68m) },
             { new MonthYear(10, 2001), new Sp500Price(10, 2001, 1076.59m) },
@@ -223,6 +239,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 2001), new Sp500Price(3, 2001, 1185.85m) },
             { new MonthYear(2, 2001), new Sp500Price(2, 2001, 1305.75m) },
             { new MonthYear(1, 2001), new Sp500Price(1, 2001, 1335.63m) },
+
             { new MonthYear(12, 2000), new Sp500Price(12, 2000, 1330.93m) },
             { new MonthYear(11, 2000), new Sp500Price(11, 2000, 1378.04m) },
             { new MonthYear(10, 2000), new Sp500Price(10, 2000, 1390.14m) },
@@ -235,6 +252,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 2000), new Sp500Price(3, 2000, 1442.21m) },
             { new MonthYear(2, 2000), new Sp500Price(2, 2000, 1388.87m) },
             { new MonthYear(1, 2000), new Sp500Price(1, 2000, 1425.59m) },
+
             { new MonthYear(12, 1999), new Sp500Price(12, 1999, 1428.68m) },
             { new MonthYear(11, 1999), new Sp500Price(11, 1999, 1391m) },
             { new MonthYear(10, 1999), new Sp500Price(10, 1999, 1300.01m) },
@@ -247,6 +265,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1999), new Sp500Price(3, 1999, 1281.66m) },
             { new MonthYear(2, 1999), new Sp500Price(2, 1999, 1246.58m) },
             { new MonthYear(1, 1999), new Sp500Price(1, 1999, 1248.77m) },
+
             { new MonthYear(12, 1998), new Sp500Price(12, 1998, 1190.05m) },
             { new MonthYear(11, 1998), new Sp500Price(11, 1998, 1144.43m) },
             { new MonthYear(10, 1998), new Sp500Price(10, 1998, 1032.47m) },
@@ -259,6 +278,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1998), new Sp500Price(3, 1998, 1076.83m) },
             { new MonthYear(2, 1998), new Sp500Price(2, 1998, 1023.74m) },
             { new MonthYear(1, 1998), new Sp500Price(1, 1998, 963.36m) },
+
             { new MonthYear(12, 1997), new Sp500Price(12, 1997, 962.37m) },
             { new MonthYear(11, 1997), new Sp500Price(11, 1997, 938.92m) },
             { new MonthYear(10, 1997), new Sp500Price(10, 1997, 951.16m) },
@@ -271,6 +291,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1997), new Sp500Price(3, 1997, 792.16m) },
             { new MonthYear(2, 1997), new Sp500Price(2, 1997, 798.39m) },
             { new MonthYear(1, 1997), new Sp500Price(1, 1997, 766.22m) },
+
             { new MonthYear(12, 1996), new Sp500Price(12, 1996, 743.25m) },
             { new MonthYear(11, 1996), new Sp500Price(11, 1996, 735.67m) },
             { new MonthYear(10, 1996), new Sp500Price(10, 1996, 701.46m) },
@@ -283,6 +304,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1996), new Sp500Price(3, 1996, 647.07m) },
             { new MonthYear(2, 1996), new Sp500Price(2, 1996, 649.54m) },
             { new MonthYear(1, 1996), new Sp500Price(1, 1996, 614.42m) },
+
             { new MonthYear(12, 1995), new Sp500Price(12, 1995, 614.57m) },
             { new MonthYear(11, 1995), new Sp500Price(11, 1995, 595.53m) },
             { new MonthYear(10, 1995), new Sp500Price(10, 1995, 582.92m) },
@@ -295,6 +317,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1995), new Sp500Price(3, 1995, 493.15m) },
             { new MonthYear(2, 1995), new Sp500Price(2, 1995, 481.92m) },
             { new MonthYear(1, 1995), new Sp500Price(1, 1995, 465.25m) },
+
             { new MonthYear(12, 1994), new Sp500Price(12, 1994, 455.19m) },
             { new MonthYear(11, 1994), new Sp500Price(11, 1994, 461.01m) },
             { new MonthYear(10, 1994), new Sp500Price(10, 1994, 463.81m) },
@@ -307,6 +330,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1994), new Sp500Price(3, 1994, 463.81m) },
             { new MonthYear(2, 1994), new Sp500Price(2, 1994, 471.58m) },
             { new MonthYear(1, 1994), new Sp500Price(1, 1994, 472.99m) },
+
             { new MonthYear(12, 1993), new Sp500Price(12, 1993, 465.95m) },
             { new MonthYear(11, 1993), new Sp500Price(11, 1993, 462.89m) },
             { new MonthYear(10, 1993), new Sp500Price(10, 1993, 463.9m) },
@@ -319,6 +343,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1993), new Sp500Price(3, 1993, 450.16m) },
             { new MonthYear(2, 1993), new Sp500Price(2, 1993, 441.7m) },
             { new MonthYear(1, 1993), new Sp500Price(1, 1993, 435.23m) },
+
             { new MonthYear(12, 1992), new Sp500Price(12, 1992, 435.64m) },
             { new MonthYear(11, 1992), new Sp500Price(11, 1992, 422.84m) },
             { new MonthYear(10, 1992), new Sp500Price(10, 1992, 412.5m) },
@@ -331,6 +356,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1992), new Sp500Price(3, 1992, 407.36m) },
             { new MonthYear(2, 1992), new Sp500Price(2, 1992, 412.56m) },
             { new MonthYear(1, 1992), new Sp500Price(1, 1992, 416.08m) },
+
             { new MonthYear(12, 1991), new Sp500Price(12, 1991, 388.51m) },
             { new MonthYear(11, 1991), new Sp500Price(11, 1991, 385.92m) },
             { new MonthYear(10, 1991), new Sp500Price(10, 1991, 386.88m) },
@@ -343,6 +369,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1991), new Sp500Price(3, 1991, 372.28m) },
             { new MonthYear(2, 1991), new Sp500Price(2, 1991, 362.26m) },
             { new MonthYear(1, 1991), new Sp500Price(1, 1991, 325.49m) },
+
             { new MonthYear(12, 1990), new Sp500Price(12, 1990, 328.75m) },
             { new MonthYear(11, 1990), new Sp500Price(11, 1990, 315.29m) },
             { new MonthYear(10, 1990), new Sp500Price(10, 1990, 307.12m) },
@@ -355,6 +382,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1990), new Sp500Price(3, 1990, 338.46m) },
             { new MonthYear(2, 1990), new Sp500Price(2, 1990, 330.45m) },
             { new MonthYear(1, 1990), new Sp500Price(1, 1990, 339.97m) },
+
             { new MonthYear(12, 1989), new Sp500Price(12, 1989, 348.6m) },
             { new MonthYear(11, 1989), new Sp500Price(11, 1989, 340.2m) },
             { new MonthYear(10, 1989), new Sp500Price(10, 1989, 347.4m) },
@@ -367,6 +395,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1989), new Sp500Price(3, 1989, 292.7m) },
             { new MonthYear(2, 1989), new Sp500Price(2, 1989, 294m) },
             { new MonthYear(1, 1989), new Sp500Price(1, 1989, 285.4m) },
+
             { new MonthYear(12, 1988), new Sp500Price(12, 1988, 276.5m) },
             { new MonthYear(11, 1988), new Sp500Price(11, 1988, 271m) },
             { new MonthYear(10, 1988), new Sp500Price(10, 1988, 277.4m) },
@@ -379,6 +408,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1988), new Sp500Price(3, 1988, 265.7m) },
             { new MonthYear(2, 1988), new Sp500Price(2, 1988, 258.1m) },
             { new MonthYear(1, 1988), new Sp500Price(1, 1988, 250.5m) },
+
             { new MonthYear(12, 1987), new Sp500Price(12, 1987, 241m) },
             { new MonthYear(11, 1987), new Sp500Price(11, 1987, 245m) },
             { new MonthYear(10, 1987), new Sp500Price(10, 1987, 280.2m) },
@@ -391,6 +421,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1987), new Sp500Price(3, 1987, 292.5m) },
             { new MonthYear(2, 1987), new Sp500Price(2, 1987, 280.9m) },
             { new MonthYear(1, 1987), new Sp500Price(1, 1987, 264.5m) },
+
             { new MonthYear(12, 1986), new Sp500Price(12, 1986, 248.6m) },
             { new MonthYear(11, 1986), new Sp500Price(11, 1986, 245.1m) },
             { new MonthYear(10, 1986), new Sp500Price(10, 1986, 237.4m) },
@@ -403,6 +434,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1986), new Sp500Price(3, 1986, 232.3m) },
             { new MonthYear(2, 1986), new Sp500Price(2, 1986, 219.4m) },
             { new MonthYear(1, 1986), new Sp500Price(1, 1986, 208.2m) },
+
             { new MonthYear(12, 1985), new Sp500Price(12, 1985, 207.3m) },
             { new MonthYear(11, 1985), new Sp500Price(11, 1985, 197.5m) },
             { new MonthYear(10, 1985), new Sp500Price(10, 1985, 186.2m) },
@@ -415,6 +447,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1985), new Sp500Price(3, 1985, 179.4m) },
             { new MonthYear(2, 1985), new Sp500Price(2, 1985, 180.9m) },
             { new MonthYear(1, 1985), new Sp500Price(1, 1985, 171.6m) },
+
             { new MonthYear(12, 1984), new Sp500Price(12, 1984, 164.5m) },
             { new MonthYear(11, 1984), new Sp500Price(11, 1984, 166.3m) },
             { new MonthYear(10, 1984), new Sp500Price(10, 1984, 164.8m) },
@@ -427,6 +460,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1984), new Sp500Price(3, 1984, 157.4m) },
             { new MonthYear(2, 1984), new Sp500Price(2, 1984, 157.3m) },
             { new MonthYear(1, 1984), new Sp500Price(1, 1984, 166.4m) },
+
             { new MonthYear(12, 1983), new Sp500Price(12, 1983, 164.4m) },
             { new MonthYear(11, 1983), new Sp500Price(11, 1983, 165.2m) },
             { new MonthYear(10, 1983), new Sp500Price(10, 1983, 167.7m) },
@@ -439,6 +473,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1983), new Sp500Price(3, 1983, 151.9m) },
             { new MonthYear(2, 1983), new Sp500Price(2, 1983, 146.8m) },
             { new MonthYear(1, 1983), new Sp500Price(1, 1983, 144.3m) },
+
             { new MonthYear(12, 1982), new Sp500Price(12, 1982, 139.4m) },
             { new MonthYear(11, 1982), new Sp500Price(11, 1982, 138.1m) },
             { new MonthYear(10, 1982), new Sp500Price(10, 1982, 132.7m) },
@@ -451,6 +486,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1982), new Sp500Price(3, 1982, 110.8m) },
             { new MonthYear(2, 1982), new Sp500Price(2, 1982, 114.5m) },
             { new MonthYear(1, 1982), new Sp500Price(1, 1982, 117.3m) },
+
             { new MonthYear(12, 1981), new Sp500Price(12, 1981, 123.8m) },
             { new MonthYear(11, 1981), new Sp500Price(11, 1981, 122.9m) },
             { new MonthYear(10, 1981), new Sp500Price(10, 1981, 119.8m) },
@@ -463,6 +499,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1981), new Sp500Price(3, 1981, 133.2m) },
             { new MonthYear(2, 1981), new Sp500Price(2, 1981, 128.4m) },
             { new MonthYear(1, 1981), new Sp500Price(1, 1981, 133m) },
+
             { new MonthYear(12, 1980), new Sp500Price(12, 1980, 133.5m) },
             { new MonthYear(11, 1980), new Sp500Price(11, 1980, 135.7m) },
             { new MonthYear(10, 1980), new Sp500Price(10, 1980, 130.2m) },
@@ -475,6 +512,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1980), new Sp500Price(3, 1980, 104.7m) },
             { new MonthYear(2, 1980), new Sp500Price(2, 1980, 115.3m) },
             { new MonthYear(1, 1980), new Sp500Price(1, 1980, 110.9m) },
+
             { new MonthYear(12, 1979), new Sp500Price(12, 1979, 107.8m) },
             { new MonthYear(11, 1979), new Sp500Price(11, 1979, 103.7m) },
             { new MonthYear(10, 1979), new Sp500Price(10, 1979, 104.5m) },
@@ -487,6 +525,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1979), new Sp500Price(3, 1979, 100.1m) },
             { new MonthYear(2, 1979), new Sp500Price(2, 1979, 98.23m) },
             { new MonthYear(1, 1979), new Sp500Price(1, 1979, 99.71m) },
+
             { new MonthYear(12, 1978), new Sp500Price(12, 1978, 96.11m) },
             { new MonthYear(11, 1978), new Sp500Price(11, 1978, 94.71m) },
             { new MonthYear(10, 1978), new Sp500Price(10, 1978, 100.6m) },
@@ -499,6 +538,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1978), new Sp500Price(3, 1978, 88.82m) },
             { new MonthYear(2, 1978), new Sp500Price(2, 1978, 88.98m) },
             { new MonthYear(1, 1978), new Sp500Price(1, 1978, 90.25m) },
+
             { new MonthYear(12, 1977), new Sp500Price(12, 1977, 93.82m) },
             { new MonthYear(11, 1977), new Sp500Price(11, 1977, 94.28m) },
             { new MonthYear(10, 1977), new Sp500Price(10, 1977, 93.74m) },
@@ -511,6 +551,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1977), new Sp500Price(3, 1977, 100.6m) },
             { new MonthYear(2, 1977), new Sp500Price(2, 1977, 101m) },
             { new MonthYear(1, 1977), new Sp500Price(1, 1977, 103.8m) },
+
             { new MonthYear(12, 1976), new Sp500Price(12, 1976, 104.7m) },
             { new MonthYear(11, 1976), new Sp500Price(11, 1976, 101.2m) },
             { new MonthYear(10, 1976), new Sp500Price(10, 1976, 101.9m) },
@@ -523,6 +564,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1976), new Sp500Price(3, 1976, 101.1m) },
             { new MonthYear(2, 1976), new Sp500Price(2, 1976, 100.6m) },
             { new MonthYear(1, 1976), new Sp500Price(1, 1976, 96.86m) },
+
             { new MonthYear(12, 1975), new Sp500Price(12, 1975, 88.7m) },
             { new MonthYear(11, 1975), new Sp500Price(11, 1975, 90.07m) },
             { new MonthYear(10, 1975), new Sp500Price(10, 1975, 88.57m) },
@@ -535,6 +577,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1975), new Sp500Price(3, 1975, 83.78m) },
             { new MonthYear(2, 1975), new Sp500Price(2, 1975, 80.1m) },
             { new MonthYear(1, 1975), new Sp500Price(1, 1975, 72.56m) },
+
             { new MonthYear(12, 1974), new Sp500Price(12, 1974, 67.07m) },
             { new MonthYear(11, 1974), new Sp500Price(11, 1974, 71.74m) },
             { new MonthYear(10, 1974), new Sp500Price(10, 1974, 69.44m) },
@@ -547,6 +590,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1974), new Sp500Price(3, 1974, 97.44m) },
             { new MonthYear(2, 1974), new Sp500Price(2, 1974, 93.45m) },
             { new MonthYear(1, 1974), new Sp500Price(1, 1974, 96.11m) },
+
             { new MonthYear(12, 1973), new Sp500Price(12, 1973, 94.78m) },
             { new MonthYear(11, 1973), new Sp500Price(11, 1973, 102m) },
             { new MonthYear(10, 1973), new Sp500Price(10, 1973, 109.8m) },
@@ -559,6 +603,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1973), new Sp500Price(3, 1973, 112.4m) },
             { new MonthYear(2, 1973), new Sp500Price(2, 1973, 114.2m) },
             { new MonthYear(1, 1973), new Sp500Price(1, 1973, 118.4m) },
+
             { new MonthYear(12, 1972), new Sp500Price(12, 1972, 117.5m) },
             { new MonthYear(11, 1972), new Sp500Price(11, 1972, 115.1m) },
             { new MonthYear(10, 1972), new Sp500Price(10, 1972, 109.6m) },
@@ -571,6 +616,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1972), new Sp500Price(3, 1972, 107.7m) },
             { new MonthYear(2, 1972), new Sp500Price(2, 1972, 105.2m) },
             { new MonthYear(1, 1972), new Sp500Price(1, 1972, 103.3m) },
+
             { new MonthYear(12, 1971), new Sp500Price(12, 1971, 99.17m) },
             { new MonthYear(11, 1971), new Sp500Price(11, 1971, 92.78m) },
             { new MonthYear(10, 1971), new Sp500Price(10, 1971, 97.29m) },
@@ -583,6 +629,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(3, 1971), new Sp500Price(3, 1971, 99.6m) },
             { new MonthYear(2, 1971), new Sp500Price(2, 1971, 97.11m) },
             { new MonthYear(1, 1971), new Sp500Price(1, 1971, 93.49m) },
+
             { new MonthYear(12, 1970), new Sp500Price(12, 1970, 90.05m) },
             { new MonthYear(11, 1970), new Sp500Price(11, 1970, 84.28m) },
             { new MonthYear(10, 1970), new Sp500Price(10, 1970, 84.37m) },

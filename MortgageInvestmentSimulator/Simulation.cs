@@ -28,35 +28,37 @@ namespace MortgageInvestmentSimulator
         public decimal Cash { get; private set; }
 
         /// <summary>
-        /// Gets or sets the mortgage if we have one..
+        ///     Gets or sets the mortgage if we have one..
         /// </summary>
         /// <value>The mortgage.</value>
         public Mortgage Mortgage { get; private set; }
+
         /// <summary>
-        /// Gets or sets the current year's taxes.
+        ///     Gets or sets the current year's taxes.
         /// </summary>
         /// <value>The current taxes.</value>
         public Taxes CurrentTaxes { get; private set; } = new Taxes();
 
         /// <summary>
-        /// Gets or sets the current previous year's taxes.
+        ///     Gets or sets the current previous year's taxes.
         /// </summary>
         /// <value>The current taxes.</value>
         public Taxes PreviousTaxes { get; private set; }
+
         /// <summary>
-        /// Gets the bonds we own.
+        ///     Gets the bonds we own.
         /// </summary>
         /// <value>The bonds.</value>
         public List<Treasury> Bonds { get; } = new List<Treasury>();
 
         /// <summary>
-        /// Gets the stocks we own.
+        ///     Gets the stocks we own.
         /// </summary>
         /// <value>The stocks.</value>
         public List<Sp500> Stocks { get; } = new List<Sp500>();
 
         /// <summary>
-        /// Gets or sets the months until rebalance.
+        ///     Gets or sets the months until rebalance.
         /// </summary>
         /// <value>The months until rebalance.</value>
         public int MonthsUntilRebalance { set; private get; }
@@ -150,41 +152,21 @@ namespace MortgageInvestmentSimulator
             Cash += scenario.MonthlyIncome;
         }
 
-        private void Initialize(Scenario scenario, MonthYear start)
+        private decimal GetBondValues(MonthYear now)
         {
-            // TODO:
-            HomeValue = scenario.HomeValue;
-            Cash = scenario.StartingCash;
-                MonthsUntilRebalance = scenario.RebalanceMonths ?? 0;
-            if (scenario.AvoidMortgage)
-            {
-                if (Cash >= HomeValue)
-                    Cash -= HomeValue;
-                else
-                {
-                    TakeOutMortgage(scenario.HomeValue - Cash, scenario, start);
-                    Cash = 0;
-                }
-            }
-            else
-                TakeOutMortgage(scenario.HomeValue, scenario, start);
+            return Bonds.Sum(c => c.GetFaceValue(now));
+        }
 
-            Output.VerboseLine(GetStatus(start));
-        }
         public decimal GetNetWorth(MonthYear now)
-        {
-            // TODO: Code needs work
-            return HomeValue + Cash - (Mortgage?.Balance ?? 0m);
-        }
+            => HomeValue + Cash - (Mortgage?.Balance ?? 0m) + GetStockValues(now) + GetBondValues(now);
 
         public string GetStatus(MonthYear now)
         {
             var text = new StringBuilder();
             text.AppendLine($"Net worth is {GetNetWorth(now):C0} as of {now}");
+
             // TODO: Code needs work
 #if false
-
-
         public override string ToString()
         {
             text.AppendLine($"Home value is {HomeValue:C0}");
@@ -216,6 +198,40 @@ namespace MortgageInvestmentSimulator
 #endif
             return text.ToString().TrimEnd();
         }
+
+        private decimal GetStockValues(MonthYear now)
+        {
+            return Stocks.Sum(c => c.GetValue(now));
+        }
+
+        private void Initialize(Scenario scenario, MonthYear start)
+        {
+            Output.VerboseLine($"Starting simulation in {start}");
+
+            HomeValue = scenario.HomeValue;
+            Cash = scenario.StartingCash;
+            MonthsUntilRebalance = scenario.RebalanceMonths ?? 0;
+            if (scenario.AvoidMortgage)
+            {
+                // Buy house straight out
+                if (Cash >= HomeValue)
+                    Cash -= HomeValue;
+                else
+                {
+                    // Pay what we can
+                    TakeOutMortgage(scenario.HomeValue - Cash, scenario, start);
+                    Cash = 0;
+                }
+            }
+            else
+            {
+                // Borrow as much as we can.
+                TakeOutMortgage(scenario.HomeValue, scenario, start);
+            }
+
+            Output.VerboseLine(GetStatus(start));
+        }
+
         private void Invest(Scenario scenario, MonthYear now)
         {
             // TODO:
@@ -230,16 +246,19 @@ namespace MortgageInvestmentSimulator
 
         private void MortgageInterestDeduction(Taxes taxes, Scenario scenario, MonthYear now)
         {
-            // TODO:
             if (!scenario.AllowMortgageInterestDeduction)
                 return;
 
             var mortgageInterest = taxes.MortgageInterest;
-            if(mortgageInterest <= 0)
+            if (mortgageInterest <= 0)
                 return;
 
             var valueOfDeduction = mortgageInterest * scenario.MarginalTaxRate;
+            if (valueOfDeduction <= 0)
+                return;
+
             Cash += valueOfDeduction;
+            Output.WriteLine($"Claimed a mortgage interest deduction worth {valueOfDeduction:C0}");
         }
 
         private void PayDownHouse(Scenario scenario, MonthYear now)
@@ -248,9 +267,11 @@ namespace MortgageInvestmentSimulator
             if (!scenario.AvoidMortgage)
                 return;
 
-            if (Cash <= 0)
+            if (Mortgage == null)
                 return;
             if (Mortgage.Balance <= 0)
+                return;
+            if (Cash <= 0)
                 return;
 
             var principal = Math.Min(Mortgage.Balance, Cash);
@@ -391,19 +412,19 @@ namespace MortgageInvestmentSimulator
         public void Run(Scenario scenario, MonthYear start)
         {
             // TODO:
-                Initialize(scenario, start);
-                var now = new MonthYear(start);
-                var end = new MonthYear(now).AddYears(scenario.SimulationYears);
-                while (now <= end)
-                {
-                    Simulate(scenario, now);
-                    now = now.AddMonths(1);
-                }
+            Initialize(scenario, start);
+            var now = new MonthYear(start);
+            var end = new MonthYear(now).AddYears(scenario.SimulationYears);
+            while (now <= end)
+            {
+                Simulate(scenario, now);
+                now = now.AddMonths(1);
+            }
 
-                CloseBooks(scenario, now);
+            CloseBooks(scenario, now);
 
-                Output.VerboseLine(GetStatus(now));
-                Output.WriteLine(ToString());
+            Output.VerboseLine(GetStatus(now));
+            Output.WriteLine($"{start} simulation succeeded with net worth of {GetNetWorth(now)}");
         }
 
         private bool ScroungeMoney(decimal amount, MonthYear now)
@@ -420,8 +441,7 @@ namespace MortgageInvestmentSimulator
         private decimal SellBond(Treasury bond, decimal amount, MonthYear now)
         {
             // TODO:
-            var rate = TreasuryInterestRates.GetRate(now);
-            var faceValue = bond.GetFaceValue(now, rate.InterestRate);
+            var faceValue = bond.GetFaceValue(now);
             if (faceValue <= amount)
             {
                 CurrentTaxes.TreasuryInterest = faceValue - bond.Purchase;
@@ -525,54 +545,28 @@ namespace MortgageInvestmentSimulator
 
         private void TakeOutMortgage(decimal amount, Scenario scenario, MonthYear start)
         {
-            // TODO:
+            if (Mortgage != null)
+                throw new InvalidOperationException("Mortgage != null");
+
             if (amount <= 0)
                 return;
 
-            // origination fee
-            // *(1 + scenario.OriginationFee)
-            Mortgage.Amount = Mortgage.Balance = amount;
-            Mortgage.Years = scenario.MortgageTerm.GetYears();
+            var rate = scenario.MortgageInterestRate;
+            if (!rate.HasValue || rate.Value <= 0)
+                rate = MortgageInterestRates.GetRate(start, scenario.MortgageTerm).InterestRate;
 
-            var interestRate = scenario.MortgageInterestRate;
-            if (!interestRate.HasValue)
-                interestRate = MortgageInterestRates.GetRate(start, scenario.MortgageTerm).InterestRate;
-
-            Mortgage.InterestRate = interestRate.Value;
-
-            Mortgage.Payment = PaymentCalculator.CalculatePayment(Mortgage.Amount, Mortgage.InterestRate, Mortgage.Years);
+            amount *= 1 + Math.Max(0, scenario.OriginationFee);
+            var years = scenario.MortgageTerm.GetYears();
+            Mortgage = new Mortgage
+            {
+                Amount = amount,
+                Balance = amount,
+                Years = years,
+                InterestRate = rate.Value,
+                Payment = PaymentCalculator.CalculatePayment(amount, rate.Value, years),
+            };
+            Output.VerboseLine($"Take out mortgage on {start}");
+            Output.VerboseLine($"{Mortgage}");
         }
     }
 }
-
-// TODO: 
-#if false
-
-// TODO: Code needs work
-
-
-#endif
-#if false
-30
-        public MonthYear Start { get; set; } = new MonthYear(1, 1972);
-        public MonthYear End { get; set; } = new MonthYear(1, 2018);
-        public int SimulationYears { get; set; } = 10;
-        public decimal HomeValue { get; set; } = 200000;
-        public decimal MonthlyIncome { get; set; } = 1500;
-        public decimal StartingCash { get; set; } = 200000;
-        public decimal? MortgageInterestRate { get; set; }
-        public decimal StockPercentage { get; set; } = .80m;
-        public MortgageTerm MortgageTerm { get; set; } = MortgageTerm.ThirtyYear;
-        public decimal OriginationFee { get; set; } = .0125m;
-        public bool ShouldPayOffHouse { get; set; }
-        public bool AvoidMortgage { get; set; }
-        public int? RebalanceMonths { get; set; } = 12;
-        public bool AllowRefinance { get; set; } = true;
-        public int RefinancePayBackMonths { get; set; } = 60;
-        public decimal MarginalTaxRate { get; set; } = .38m;
-        public bool AllowMortgageInterestDeduction { get; set; } = true;
-        public decimal DividendTaxRate { get; set; } = .15m;
-        public decimal CapitalGainsTaxRate { get; set; } = .15m;
-        public decimal TreasuryInterestTaxRate { get; set; } = .32m;
-
-#endif

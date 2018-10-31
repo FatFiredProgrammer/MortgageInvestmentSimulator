@@ -23,6 +23,12 @@ namespace MortgageInvestmentSimulator
         /// <value>The basis.</value>
         public decimal PurchasePrice { get; set; }
 
+        public decimal GetValue(MonthYear now)
+        {
+            var price = Sp500Prices.GetPrice(now);
+            return Shares * price.Price;
+        }
+
         /// <inheritdoc />
         public override string ToString() => $"{Shares:N2} @ {PurchasePrice:C2}";
     }

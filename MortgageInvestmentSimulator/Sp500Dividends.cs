@@ -8,7 +8,6 @@ namespace MortgageInvestmentSimulator
     {
         private static readonly Dictionary<MonthYear, Sp500Dividend> _rates = new Dictionary<MonthYear, Sp500Dividend>
         {
-            { new MonthYear(10, 2018), new Sp500Dividend(10, 2018, 0.0192m) },
             { new MonthYear(10, 2018), new Sp500Dividend(10, 2018, 0.0179m) },
             { new MonthYear(9, 2018), new Sp500Dividend(9, 2018, 0.0181m) },
             { new MonthYear(8, 2018), new Sp500Dividend(8, 2018, 0.0182m) },
