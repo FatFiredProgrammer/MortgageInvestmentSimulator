@@ -43,7 +43,7 @@ namespace MortgageInvestmentSimulator
         ///     Gets or sets the monthly income that we have to either pay the mortgage or invest.
         /// </summary>
         /// <value>The monthly income.</value>
-        public decimal MonthlyIncome { get; set; } = 0;
+        public decimal MonthlyIncome { get; set; } = 1500;
 
         /// <summary>
         ///     Gets or sets the amount of cash we have at the start.

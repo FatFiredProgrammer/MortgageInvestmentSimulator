@@ -82,6 +82,75 @@ namespace MortgageInvestmentSimulator
 
         private void Simulate(Scenario scenario, MonthYear now, Strategy strategy)
         {
+            Output.VerboseLine($"Simulating {now}");
+            SimulateIncome(scenario, now);
+
+            SimulatePayMortgage(now);
+            switch (strategy)
+            {
+                case Strategy.PayOffHouse:
+                    SimulatePayOffHouse(scenario, now);
+                    break;
+
+                case Strategy.Invest:
+                    SimulateInvest(scenario, now);
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(strategy), strategy, null);
+            }
+        }
+
+        private void SimulatePayMortgage(MonthYear now)
+        {
+            if (_financials.MortgageBalance <= 0)
+                return;
+
+            if (_financials.Cash < _financials.MonthlyPayment)
+                throw new SimulationFailedException($"Could not make mortgage payment in {now}");
+
+            _financials.Cash -= _financials.MonthlyPayment;
+
+            var interest = _financials.MortgageBalance * _financials.MortgageInterestRate / 12;
+            if (interest > _financials.MonthlyPayment)
+            {
+                var growth = interest - _financials.MonthlyPayment;
+                _financials.MortgageBalance += growth;
+                Output.VerboseLine($"Mortgage interest of {interest:C0}; balance grew by {growth:C0} to {_financials.MortgageBalance:C0}");
+            }
+            else
+            {
+                var principal = _financials.MonthlyPayment - interest;
+                _financials.MortgageBalance -= principal;
+                Output.VerboseLine($"Mortgage interest of {interest:C0}; principal payment of {principal:C0} with balance of {_financials.MortgageBalance:C0}");
+            }
+        }
+
+        private void SimulateIncome(Scenario scenario, MonthYear now)
+        {
+            if (scenario.MonthlyIncome <= 0)
+                return;
+
+            Output.VerboseLine($"Monthly income of {scenario.MonthlyIncome:C0} for {now}");
+            _financials.Cash += scenario.MonthlyIncome;
+
+        }
+
+        private void SimulateInvest(Scenario scenario, MonthYear now)
+        {
+        }
+
+        private void SimulatePayOffHouse(Scenario scenario, MonthYear now)
+        {
+            if (_financials.Cash <= 0)
+                return;
+            if (_financials.MortgageBalance <= 0)
+                return;
+
+            var principal = Math.Min(_financials.MortgageBalance, _financials.Cash);
+            _financials.Cash -= principal;
+            _financials.MortgageBalance -= principal;
+            Output.VerboseLine($"Addition mortgage principal of {principal:C0}; remaining balance of {_financials.MortgageBalance:C0}");
         }
 
         private void TakeOutLoan(decimal amount, MortgageTerm term, decimal? interestRate, MonthYear start)
