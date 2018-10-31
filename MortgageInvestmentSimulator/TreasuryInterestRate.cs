@@ -2,9 +2,9 @@
 
 namespace MortgageInvestmentSimulator
 {
-    public sealed class MortgageInterestRate
+    public sealed class TreasuryInterestRate
     {
-        public MortgageInterestRate(int month, int year, decimal interestRate)
+        public TreasuryInterestRate(int month, int year, decimal interestRate)
         {
             Month = month;
             Year = year;

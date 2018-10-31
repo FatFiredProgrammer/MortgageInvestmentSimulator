@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MortgageInvestmentSimulator
 {
-    public sealed partial class MortgageInterestRate
+    public sealed class MortgageInterestRates
     {
         private static readonly Dictionary<MonthYear, MortgageInterestRate> _thirtyYearRates = new Dictionary<MonthYear, MortgageInterestRate>
         {
@@ -898,5 +898,26 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(8, 2018), new MortgageInterestRate(8, 2018, 0.0402m) },
             { new MonthYear(9, 2018), new MortgageInterestRate(9, 2018, 0.0408m) },
         };
+
+        public static MortgageInterestRate GetFifteenYearRate(MonthYear monthYear)
+            => _fifteenYearRates.TryGetValue(monthYear, out var mortgageInterestRate) ? mortgageInterestRate : null;
+
+        public static MortgageInterestRate GetRate(MonthYear monthYear, MortgageTerm term)
+        {
+            switch (term)
+            {
+                case MortgageTerm.FifteenYear:
+                    return GetFifteenYearRate(monthYear);
+
+                case MortgageTerm.ThirtyYear:
+                    return GetThirtyYearRate(monthYear);
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(term), term, null);
+            }
+        }
+
+        public static MortgageInterestRate GetThirtyYearRate(MonthYear monthYear)
+            => _thirtyYearRates.TryGetValue(monthYear, out var mortgageInterestRate) ? mortgageInterestRate : null;
     }
 }

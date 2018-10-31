@@ -2,19 +2,19 @@
 
 namespace MortgageInvestmentSimulator
 {
-    public sealed class MortgageInterestRate
+    public sealed class Sp500Price
     {
-        public MortgageInterestRate(int month, int year, decimal interestRate)
+        public Sp500Price(int month, int year, decimal price)
         {
             Month = month;
             Year = year;
-            InterestRate = interestRate;
+            Price = price;
         }
 
         public int Month { get; }
 
         public int Year { get; }
 
-        public decimal InterestRate { get; }
+        public decimal Price { get; }
     }
 }
