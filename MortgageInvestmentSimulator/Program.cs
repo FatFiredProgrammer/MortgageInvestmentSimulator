@@ -21,7 +21,7 @@ namespace MortgageInvestmentSimulator
             }
             catch (Exception exception)
             {
-                output.WriteLine("*** Simulator Failed ***");
+                output.WriteLine("*** Failed ***");
                 output.WriteLine(exception.Message);
             }
         }

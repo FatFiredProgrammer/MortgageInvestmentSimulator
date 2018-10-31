@@ -21,6 +21,7 @@ namespace MortgageInvestmentSimulator
         public decimal InterestRate { get; }
 
         /// <inheritdoc />
-        public override string ToString() => $"{Date} => {InterestRate:P2}";
+        public override string ToString()
+            => $"{Date} => {InterestRate:P2}";
     }
 }

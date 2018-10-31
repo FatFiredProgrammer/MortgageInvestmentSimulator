@@ -601,5 +601,3 @@ namespace MortgageInvestmentSimulator
             => _rates.TryGetValue(monthYear, out var price) ? price : throw new SimulationException($"No S&P 500 price data for {monthYear}");
     }
 }
-
-// TODO: 

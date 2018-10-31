@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Diagnostics;
+using JetBrains.Annotations;
 
 namespace MortgageInvestmentSimulator
 {
@@ -6,14 +7,10 @@ namespace MortgageInvestmentSimulator
     ///     Class representing a single purchase of SP 500.
     ///     We allow a fractional number of shares as a simplification (much like a mutual fund).
     /// </summary>
+    [PublicAPI]
+    [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public sealed class Sp500
     {
-        /// <summary>
-        ///     Gets the identifier which is used as kind of a lot number.
-        /// </summary>
-        /// <value>The identifier.</value>
-        public Guid Id { get; } = Guid.NewGuid();
-
         /// <summary>
         ///     Gets or sets the fractional number of shares.
         /// </summary>
@@ -25,7 +22,8 @@ namespace MortgageInvestmentSimulator
         /// </summary>
         /// <value>The basis.</value>
         public decimal PurchasePrice { get; set; }
+
+        /// <inheritdoc />
+        public override string ToString() => $"{Shares:N2} @ {PurchasePrice:C2}";
     }
 }
-
-// TODO: 

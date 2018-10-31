@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Diagnostics;
+using JetBrains.Annotations;
 
 namespace MortgageInvestmentSimulator
 {
@@ -6,14 +7,10 @@ namespace MortgageInvestmentSimulator
     ///     Class representing a single purchase of a 1 year US treasury.
     ///     To simplify, we allow any dollar amount. Not just multiples of 100.
     /// </summary>
+    [PublicAPI]
+    [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public sealed class Treasury
     {
-        /// <summary>
-        ///     Gets the identifier which is used as kind of a lot number.
-        /// </summary>
-        /// <value>The identifier.</value>
-        public Guid Id { get; } = Guid.NewGuid();
-
         /// <summary>
         ///     Gets or sets the par value.
         /// </summary>
@@ -26,21 +23,30 @@ namespace MortgageInvestmentSimulator
         /// <value>The purchase.</value>
         public decimal Purchase { get; set; }
 
+        /// <summary>
+        ///     Gets or sets the maturity date.
+        /// </summary>
+        /// <value>The maturity.</value>
         public MonthYear Maturity { get; set; }
-
-        public static decimal GetFutureValue(decimal presentValue, decimal interestRate, decimal years = 1.0m)
-            => presentValue / (1 - interestRate / 12);
 
         public decimal GetFaceValue(MonthYear now, decimal interestRate)
         {
-            if (IsMature(now))
+            if (IsMatured(now))
                 return Par;
 
             var months = MonthYear.MonthDifference(Maturity, now);
             return GetPresentValue(Par, interestRate, (decimal)months / 12);
         }
 
-        public bool IsMature(MonthYear now) => now >= Maturity;
+        /// <summary>
+        ///     Gets the future value.
+        /// </summary>
+        /// <param name="presentValue">The present value.</param>
+        /// <param name="interestRate">The interest rate.</param>
+        /// <param name="years">The years.</param>
+        /// <returns>System.Decimal.</returns>
+        public static decimal GetFutureValue(decimal presentValue, decimal interestRate, decimal years = 1.0m)
+            => presentValue / (1 - interestRate / 12);
 
         /// <summary>
         ///     Calculate present value
@@ -51,7 +57,15 @@ namespace MortgageInvestmentSimulator
         /// <returns>System.Decimal.</returns>
         public static decimal GetPresentValue(decimal futureValue, decimal interestRate, decimal years = 1.0m)
             => futureValue * (1 - interestRate / 12);
+
+        /// <summary>
+        ///     Determines whether the specified now is mature.
+        /// </summary>
+        /// <param name="now">The now.</param>
+        /// <returns><c>true</c> if the specified now is mature; otherwise, <c>false</c>.</returns>
+        public bool IsMatured(MonthYear now) => now >= Maturity;
+
+        public override string ToString()
+            => $"{Par:C0} maturing {Maturity}; purchased @ {Purchase:C0}";
     }
 }
-
-// TODO: 

@@ -604,5 +604,3 @@ namespace MortgageInvestmentSimulator
             => _rates.TryGetValue(monthYear, out var rate) ? rate : throw new SimulationException($"No treasury rate data for {monthYear}");
     }
 }
-
-// TODO: 

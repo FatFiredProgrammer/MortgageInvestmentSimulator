@@ -4,6 +4,9 @@ using System.Globalization;
 
 namespace MortgageInvestmentSimulator
 {
+    /// <summary>
+    ///     A class representing a month and year.
+    /// </summary>
     public sealed class MonthYear : IEquatable<MonthYear>, IComparable<MonthYear>
     {
         public MonthYear(int month, int year)
@@ -101,8 +104,7 @@ namespace MortgageInvestmentSimulator
         public static bool operator <(MonthYear left, MonthYear right) => Comparer<MonthYear>.Default.Compare(left, right) < 0;
 
         public static bool operator <=(MonthYear left, MonthYear right) => Comparer<MonthYear>.Default.Compare(left, right) <= 0;
+
         public static TimeSpan operator -(MonthYear left, MonthYear right) => (DateTime)left - (DateTime)right;
     }
 }
-
-// TODO: 

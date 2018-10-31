@@ -601,5 +601,3 @@ namespace MortgageInvestmentSimulator
             => _rates.TryGetValue(monthYear, out var dividend) ? dividend : throw new SimulationException($"No S&P 500 dividend data for {monthYear}");
     }
 }
-
-// TODO: 

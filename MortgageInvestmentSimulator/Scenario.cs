@@ -1,10 +1,14 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
+using JetBrains.Annotations;
 
 namespace MortgageInvestmentSimulator
 {
     /// <summary>
     ///     A description of the scenario that we are running.
     /// </summary>
+    [PublicAPI]
+    [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public sealed class Scenario
     {
         /// <summary>
@@ -65,9 +69,9 @@ namespace MortgageInvestmentSimulator
         public MortgageTerm MortgageTerm { get; set; } = MortgageTerm.ThirtyYear;
 
         /// <summary>
-        /// Gets or sets the origination fee.
-        /// This is a percentage of the total loan.
-        /// The amount is added into the loan.
+        ///     Gets or sets the origination fee.
+        ///     This is a percentage of the total loan.
+        ///     The amount is added into the loan.
         /// </summary>
         /// <value>The origination fee.</value>
         public decimal OriginationFee { get; set; } = .0125m;
@@ -79,61 +83,58 @@ namespace MortgageInvestmentSimulator
         public bool ShouldPayOffHouse { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether we should avoid mortgage and pay mortgage down when possible.
+        ///     Gets or sets a value indicating whether we should avoid mortgage and pay mortgage down when possible.
         /// </summary>
         /// <value><c>true</c> if avoid mortgage; otherwise, <c>false</c>.</value>
         public bool AvoidMortgage { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of months between re-balancing.
+        ///     Gets or sets the number of months between re-balancing.
         /// </summary>
         /// <value>The number months.</value>
         public int? RebalanceMonths { get; set; } = 12;
 
         /// <summary>
-        /// Gets or sets a value indicating whether allow refinance.
+        ///     Gets or sets a value indicating whether allow refinance.
         /// </summary>
         /// <value><c>true</c> if allow refinance; otherwise, <c>false</c>.</value>
         public bool AllowRefinance { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets the refinance pay back months.
-        /// We refinance if we regain our refinancing fee within this number of months.
+        ///     Gets or sets the refinance pay back months.
+        ///     We refinance if we regain our refinancing fee within this number of months.
         /// </summary>
         /// <value>The refinance pay back months.</value>
         public int RefinancePayBackMonths { get; set; } = 60;
 
-
         /// <summary>
-        /// Gets or sets the marginal tax rate.
-        /// This is used to calculate the value of the mortgage interest deduction
+        ///     Gets or sets the marginal tax rate.
+        ///     This is used to calculate the value of the mortgage interest deduction
         /// </summary>
         /// <value>The marginal tax rate.</value>
         public decimal MarginalTaxRate { get; set; } = .38m;
 
         /// <summary>
-        /// Gets or sets a value indicating whether mortgage interest deduction is used.
+        ///     Gets or sets a value indicating whether mortgage interest deduction is used.
         /// </summary>
         /// <value><c>true</c> if mortgage interest deduction; otherwise, <c>false</c>.</value>
-        public bool AllowMortgageInterestDeduction { get; set; }
-
-
+        public bool AllowMortgageInterestDeduction { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets the dividend tax rate.
+        ///     Gets or sets the dividend tax rate.
         /// </summary>
         /// <value>The dividend tax rate.</value>
         public decimal DividendTaxRate { get; set; } = .15m;
 
         /// <summary>
-        /// Gets or sets the capital gains tax rate.
+        ///     Gets or sets the capital gains tax rate.
         /// </summary>
         /// <value>The capital gains tax rate.</value>
         public decimal CapitalGainsTaxRate { get; set; } = .15m;
 
         /// <summary>
-        /// Gets or sets the treasury interest tax rate.
-        /// Normally, this is only the fed rate. Not the state rate.
+        ///     Gets or sets the treasury interest tax rate.
+        ///     Normally, this is only the fed rate. Not the state rate.
         /// </summary>
         /// <value>The treasury interest tax rate.</value>
         public decimal TreasuryInterestTaxRate { get; set; } = .32m;
@@ -149,16 +150,28 @@ namespace MortgageInvestmentSimulator
                 text.AppendLine($"Monthly income is {MonthlyIncome:C0}");
             if (StartingCash > 0)
                 text.AppendLine($"Starting cash is {StartingCash:C0}");
-            text.AppendLine($"{MortgageTerm} mortgage");
+            text.AppendLine($"{MortgageTerm.GetYears()} year mortgage");
             text.AppendLine(MortgageInterestRate != null ? $"Mortgage interest rate is {MortgageInterestRate:P2}" : "Mortgage interest rate is monthly average.");
+            text.AppendLine($"{OriginationFee:P2} origination fee on loan");
             if (StockPercentage > 0)
                 text.AppendLine($"Invest {StockPercentage:P0} in stocks");
+            if (AvoidMortgage)
+                text.AppendLine("Should avoid having a mortgage");
             if (ShouldPayOffHouse)
                 text.AppendLine("Must pay off house at end of simulation");
+            if (AllowRefinance)
+                text.AppendLine($"Allow refinance if costs recouped in {RefinancePayBackMonths} months");
 
-            return text.ToString();
+            if (RebalanceMonths.HasValue)
+                text.AppendLine($"Should rebalance every {RebalanceMonths} months");
+            if (AllowMortgageInterestDeduction)
+                text.AppendLine($"Allow mortgage interest deduction with a {MarginalTaxRate:P2} marginal tax rate");
+
+            text.AppendLine($"{DividendTaxRate:P2} dividend tax rate");
+            text.AppendLine($"{CapitalGainsTaxRate:P2} capital gains tax rate");
+            text.AppendLine($"{TreasuryInterestTaxRate:P2} treasury tax rate");
+
+            return text.ToString().TrimEnd();
         }
     }
 }
-
-// TODO: 
