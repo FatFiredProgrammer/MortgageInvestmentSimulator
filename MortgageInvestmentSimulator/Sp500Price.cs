@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace MortgageInvestmentSimulator
+﻿namespace MortgageInvestmentSimulator
 {
     public sealed class Sp500Price
     {

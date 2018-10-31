@@ -18,19 +18,8 @@ namespace MortgageInvestmentSimulator
             while (start <= scenario.End)
             {
                 start = start.AddMonths(1);
-                if (scenario.Strategy != null)
-                {
-                    var simulation = new Simulation(Output);
-                    simulation.Run(scenario, start, scenario.Strategy.Value);
-                }
-                else
-                {
-                    foreach (Strategy strategy in Enum.GetValues(typeof(Strategy)))
-                    {
-                        var simulation = new Simulation(Output);
-                        simulation.Run(scenario, start, strategy);
-                    }
-                }
+                var simulation = new Simulation(Output);
+                simulation.Run(scenario, start);
             }
 
             Output.WriteLine("*** Simulator Successful ***");

@@ -596,6 +596,6 @@ namespace MortgageInvestmentSimulator
         };
 
         public static Sp500Price GetPrice(MonthYear monthYear)
-            => _rates.TryGetValue(monthYear, out var price) ? price : null;
+            => _rates.TryGetValue(monthYear, out var price) ? price : throw new SimulationException($"No S&P 500 price data for {monthYear}");
     }
 }

@@ -83,13 +83,10 @@ namespace MortgageInvestmentSimulator
         }
 
         /// <inheritdoc />
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (Year * 397) ^ Month;
-            }
-        }
+        public override int GetHashCode() => Year * 12 + Month;
+
+        public static int MonthDifference(MonthYear left, MonthYear right)
+            => Math.Abs((left.Month - right.Month) + 12 * (left.Year - right.Year));
 
         /// <inheritdoc />
         public override string ToString()
@@ -104,5 +101,6 @@ namespace MortgageInvestmentSimulator
         public static bool operator <(MonthYear left, MonthYear right) => Comparer<MonthYear>.Default.Compare(left, right) < 0;
 
         public static bool operator <=(MonthYear left, MonthYear right) => Comparer<MonthYear>.Default.Compare(left, right) <= 0;
+        public static TimeSpan operator -(MonthYear left, MonthYear right) => (DateTime)left - (DateTime)right;
     }
 }

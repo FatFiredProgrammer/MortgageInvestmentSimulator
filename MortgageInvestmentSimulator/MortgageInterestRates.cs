@@ -900,7 +900,7 @@ namespace MortgageInvestmentSimulator
         };
 
         public static MortgageInterestRate GetFifteenYearRate(MonthYear monthYear)
-            => _fifteenYearRates.TryGetValue(monthYear, out var mortgageInterestRate) ? mortgageInterestRate : null;
+            => _fifteenYearRates.TryGetValue(monthYear, out var mortgageInterestRate) ? mortgageInterestRate : throw new SimulationException($"No 15 year mortgage interest data for {monthYear}");
 
         public static MortgageInterestRate GetRate(MonthYear monthYear, MortgageTerm term)
         {
@@ -918,6 +918,6 @@ namespace MortgageInvestmentSimulator
         }
 
         public static MortgageInterestRate GetThirtyYearRate(MonthYear monthYear)
-            => _thirtyYearRates.TryGetValue(monthYear, out var mortgageInterestRate) ? mortgageInterestRate : null;
+            => _thirtyYearRates.TryGetValue(monthYear, out var mortgageInterestRate) ? mortgageInterestRate : throw new SimulationException($"No 30 year mortgage interest data for {monthYear}");
     }
 }

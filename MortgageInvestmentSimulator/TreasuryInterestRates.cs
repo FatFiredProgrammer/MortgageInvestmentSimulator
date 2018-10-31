@@ -2,6 +2,10 @@
 
 namespace MortgageInvestmentSimulator
 {
+    /// <summary>
+    /// US 1 year treasurer rates.
+    /// Yeah, this is a gross simplification. I understand that.
+    /// </summary>
     public static class TreasuryInterestRates
     {
         private static readonly Dictionary<MonthYear, TreasuryInterestRate> _rates = new Dictionary<MonthYear, TreasuryInterestRate>
@@ -595,6 +599,6 @@ namespace MortgageInvestmentSimulator
         };
 
         public static TreasuryInterestRate GetRate(MonthYear monthYear)
-            => _rates.TryGetValue(monthYear, out var rate) ? rate : null;
+            => _rates.TryGetValue(monthYear, out var rate) ? rate : throw new SimulationException($"No treasury rate data for {monthYear}");
     }
 }

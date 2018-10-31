@@ -1,20 +1,18 @@
-﻿using System;
-
-namespace MortgageInvestmentSimulator
+﻿namespace MortgageInvestmentSimulator
 {
     public sealed class Sp500Dividend
     {
-        public Sp500Dividend(int month, int year, decimal interestRate)
+        public Sp500Dividend(int month, int year, decimal dividendPercentage)
         {
             Month = month;
             Year = year;
-            InterestRate = interestRate;
+            DividendPercentage = dividendPercentage;
         }
 
         public int Month { get; }
 
         public int Year { get; }
 
-        public decimal InterestRate { get; }
+        public decimal DividendPercentage { get; }
     }
 }
