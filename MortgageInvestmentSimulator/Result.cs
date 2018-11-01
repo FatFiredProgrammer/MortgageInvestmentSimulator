@@ -49,7 +49,7 @@ namespace MortgageInvestmentSimulator
             get { return NetGains.Values.Where(c => c < 0).Sum(c => Math.Abs(c)).ToDollarCents(); }
         }
 
-        private KeyValuePair<MonthYear, decimal>? FindBest()
+        public KeyValuePair<MonthYear, decimal>? FindBest()
         {
             KeyValuePair<MonthYear, decimal>? best = null;
             foreach (var item in NetGains)
@@ -63,7 +63,7 @@ namespace MortgageInvestmentSimulator
             return best;
         }
 
-        private KeyValuePair<MonthYear, decimal>? FindWorst()
+        public KeyValuePair<MonthYear, decimal>? FindWorst()
         {
             KeyValuePair<MonthYear, decimal>? worst = null;
             foreach (var item in NetGains)
