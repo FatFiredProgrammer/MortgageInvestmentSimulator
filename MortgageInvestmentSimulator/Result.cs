@@ -17,13 +17,15 @@ namespace MortgageInvestmentSimulator
 
         public MonthYear End { get; set; }
 
+        public int Total => Success + Failed;
+
         public int Success { get; set; }
 
         public int Failed { get; set; }
 
         public Dictionary<MonthYear, decimal> NetWorths { get; set; } = new Dictionary<MonthYear, decimal>();
 
-        public Dictionary<MonthYear,decimal> NetGains { get; set; } = new Dictionary<MonthYear, decimal>();
+        public Dictionary<MonthYear, decimal> NetGains { get; set; } = new Dictionary<MonthYear, decimal>();
 
         public List<string> Errors { get; set; } = new List<string>();
 
@@ -45,6 +47,34 @@ namespace MortgageInvestmentSimulator
             get { return NetGains.Values.Where(c => c < 0).Sum(c => Math.Abs(c)); }
         }
 
+        private KeyValuePair<MonthYear, decimal>? FindBest()
+        {
+            KeyValuePair<MonthYear, decimal>? best = null;
+            foreach (var item in NetGains)
+            {
+                if (!best.HasValue)
+                    best = item;
+                else if (best.Value.Value < item.Value)
+                    best = item;
+            }
+
+            return best;
+        }
+
+        private KeyValuePair<MonthYear, decimal>? FindWorst()
+        {
+            KeyValuePair<MonthYear, decimal>? worst = null;
+            foreach (var item in NetGains)
+            {
+                if (!worst.HasValue)
+                    worst = item;
+                else if (worst.Value.Value > item.Value)
+                    worst = item;
+            }
+
+            return worst;
+        }
+
         private static decimal GetAverage(ICollection<decimal> values)
             => values.Count == 0 ? 0 : values.Average();
 
@@ -61,56 +91,33 @@ namespace MortgageInvestmentSimulator
             return values[values.Count / 2];
         }
 
-        private KeyValuePair<MonthYear, decimal>? FindWorst()
-        {
-            KeyValuePair<MonthYear, decimal>? worst = null;
-            foreach (var item in NetGains)
-            {
-                if (!worst.HasValue)
-                    worst = item;
-                else if(worst.Value.Value > item.Value)
-                    worst = item;
-            }
-
-            return worst;
-        }
-        private KeyValuePair<MonthYear, decimal>? FindBest()
-        {
-            KeyValuePair<MonthYear, decimal>? best = null;
-            foreach (var item in NetGains)
-            {
-                if (!best.HasValue)
-                    best = item;
-                else if (best.Value.Value < item.Value)
-                    best = item;
-            }
-
-            return best;
-        }
-
         /// <inheritdoc />
         public override string ToString()
         {
             var text = new StringBuilder();
             text.AppendLine($"Simulation from {Start} to {End}");
             text.AppendLine(AvoidMortgage ? "*Should avoid having a mortgage*" : "*Should invest money*");
-            text.AppendLine($"{Success:N0} successful and {Failed:N0} failures");
-            text.AppendLine($"Final Net worth {AverageNetWorth:C0} average; {MedianNetWorth:C0} median");
-            if (NetGains.Count > 0)
+            text.AppendLine($"{Success:N0} successful and {Failed:N0} failures of {Total:N0} ({(decimal)Success /Total:P2})");
+            if (Total > 0)
             {
-                text.AppendLine($"Net worth *gain* {AverageNetGain:C0} average; {MedianNetGain:C0} median; {NetGains.Values.Min():C0} minimum; {NetGains.Values.Max():C0} maximum");
-                var lossCount = NetLossCount;
-                if (lossCount > 0)
-                    text.AppendLine($"{lossCount:N0} net worth losses; {NetLossTotal / NetLossCount:C0} average loss; {Math.Abs(NetGains.Values.Min()):C0} worst loss");
+                text.AppendLine($"Final Net worth {AverageNetWorth:C0} average; {MedianNetWorth:C0} median");
+                if (NetGains.Count > 0)
+                {
+                    text.AppendLine($"Net worth *gain* {AverageNetGain:C0} average; {MedianNetGain:C0} median; {NetGains.Values.Min():C0} minimum; {NetGains.Values.Max():C0} maximum");
+                    var lossCount = NetLossCount;
+                    if (lossCount > 0)
+                        text.AppendLine(
+                            $"{lossCount:N0} net worth losses in {Total:N0} simulations ({(decimal)NetLossCount / Total:P2}); {NetLossTotal / NetLossCount:C0} average loss; {Math.Abs(NetGains.Values.Min()):C0} worst loss");
+                }
+
+                var worst = FindWorst();
+                if (worst.HasValue)
+                    text.AppendLine($"Worst loss of {worst.Value.Value:C0} net worth in simulation starting {worst.Value.Key}");
+
+                var best = FindBest();
+                if (best.HasValue)
+                    text.AppendLine($"Best gain of {best.Value.Value:C0} net worth in simulation starting {best.Value.Key}");
             }
-
-            var worst = FindWorst();
-            if (worst.HasValue)
-                text.AppendLine($"Worst loss of {worst.Value.Value:C0} net worth in simulation starting {worst.Value.Key}");
-
-            var best = FindBest();
-            if (best.HasValue)
-                text.AppendLine($"Best gain of {best.Value.Value:C0} net worth in simulation starting {best.Value.Key}");
 
             if (Errors.Count > 0)
             {
