@@ -47,7 +47,7 @@ namespace MortgageInvestmentSimulator
                 text.AppendLine($"{CapitalGains:C0} capital gains");
             if (TreasuryInterest > 0)
                 text.AppendLine($"{TreasuryInterest:C0} bond interest");
-            return text.ToString();
+            return text.ToString().TrimEnd();
         }
     }
 }

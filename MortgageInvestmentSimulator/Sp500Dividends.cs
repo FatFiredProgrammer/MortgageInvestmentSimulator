@@ -596,7 +596,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(1, 1970), new Sp500Dividend(1, 1970, 0.035m) },
         };
 
-        public static Sp500Dividend GetDividend(MonthYear monthYear)
-            => _rates.TryGetValue(monthYear, out var dividend) ? dividend : throw new SimulationException($"No S&P 500 dividend data for {monthYear}");
+        public static Sp500Dividend GetDividend(MonthYear now)
+            => _rates.TryGetValue(now, out var dividend) ? dividend : throw new SimulationException($"No S&P 500 dividend data for {now}");
     }
 }

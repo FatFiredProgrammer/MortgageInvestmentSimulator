@@ -24,6 +24,12 @@ namespace MortgageInvestmentSimulator
         public decimal Purchase { get; set; }
 
         /// <summary>
+        /// Gets or sets the initial interest rate.
+        /// </summary>
+        /// <value>Interest rate.</value>
+        public decimal InitialInterestRate { get; set; }
+
+        /// <summary>
         ///     Gets or sets the maturity date.
         /// </summary>
         /// <value>The maturity.</value>
@@ -36,6 +42,7 @@ namespace MortgageInvestmentSimulator
 
             var rate = TreasuryInterestRates.GetRate(now);
             var months = MonthYear.MonthDifference(Maturity, now);
+            Debug.Assert(months > 0);
             return GetPresentValue(Par, rate.InterestRate, (decimal)months / 12);
         }
 
@@ -67,6 +74,6 @@ namespace MortgageInvestmentSimulator
         public bool IsMatured(MonthYear now) => now >= Maturity;
 
         public override string ToString()
-            => $"{Par:C0} maturing {Maturity}; purchased @ {Purchase:C0}";
+            => $"{Par:C0} bond maturing {Maturity}; {Purchase:C0} price with {InitialInterestRate:P2} interest";
     }
 }

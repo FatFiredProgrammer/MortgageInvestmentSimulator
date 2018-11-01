@@ -38,6 +38,8 @@ namespace MortgageInvestmentSimulator
         {
         }
 
+        public MonthYear When { get; set; }
+
         /// <summary>
         ///     This member supports the .NET Framework infrastructure and is not intended to
         ///     be used directly from your code.

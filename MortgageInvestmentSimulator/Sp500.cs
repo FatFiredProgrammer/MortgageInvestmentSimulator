@@ -21,7 +21,7 @@ namespace MortgageInvestmentSimulator
         ///     Gets or sets the basis price for tax purposes.
         /// </summary>
         /// <value>The basis.</value>
-        public decimal PurchasePrice { get; set; }
+        public decimal BasisPrice { get; set; }
 
         public decimal GetValue(MonthYear now)
         {
@@ -30,6 +30,6 @@ namespace MortgageInvestmentSimulator
         }
 
         /// <inheritdoc />
-        public override string ToString() => $"{Shares:N2} @ {PurchasePrice:C2}";
+        public override string ToString() => $"{Shares:N2} S&P 500; {BasisPrice:C2} basis price";
     }
 }

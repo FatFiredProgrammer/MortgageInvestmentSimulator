@@ -9,11 +9,12 @@ namespace MortgageInvestmentSimulator
     ///     Our standard output method.
     /// </summary>
     [PublicAPI]
-    public sealed class ConsoleOutput : IOutput
+    public sealed class DebugOutput : IOutput
     {
         /// <inheritdoc />
         public void VerboseLine(string text)
         {
+            Debug.WriteLine(text ?? string.Empty);
         }
 
         /// <inheritdoc />

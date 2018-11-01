@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
+using JetBrains.Annotations;
 
 namespace MortgageInvestmentSimulator
 {
     /// <summary>
     ///     A class representing a month and year.
     /// </summary>
+    [PublicAPI]
+    [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public sealed class MonthYear : IEquatable<MonthYear>, IComparable<MonthYear>
     {
         public MonthYear(int month, int year)
@@ -35,6 +39,15 @@ namespace MortgageInvestmentSimulator
             Month = other.Month;
         }
 
+        /// <summary>
+        /// Gets the minimum month year.
+        /// </summary>
+        /// <value>The minimum month year.</value>
+        /// <remarks>We start a little later so we can go back and get average dividend.</remarks>
+        public static MonthYear MinMonthYear => new MonthYear(4, 1972);
+
+        public static MonthYear MaxMonthYear => new MonthYear(9, 2018);
+
         public int Year { get; }
 
         public int Month { get; }
@@ -61,6 +74,16 @@ namespace MortgageInvestmentSimulator
 
             var yearComparison = Year.CompareTo(other.Year);
             return yearComparison != 0 ? yearComparison : Month.CompareTo(other.Month);
+        }
+
+        public static MonthYear Constrain(MonthYear monthYear)
+        {
+            if (monthYear < MinMonthYear)
+                return MinMonthYear;
+            if (monthYear > MaxMonthYear)
+                return MaxMonthYear;
+
+            return monthYear;
         }
 
         /// <inheritdoc />
@@ -99,7 +122,7 @@ namespace MortgageInvestmentSimulator
 
         public static bool operator >=(MonthYear left, MonthYear right) => Comparer<MonthYear>.Default.Compare(left, right) >= 0;
 
-        public static implicit operator DateTime(MonthYear monthYear) => new DateTime(monthYear.Year, monthYear.Month, 1);
+        public static implicit operator DateTime(MonthYear now) => new DateTime(now.Year, now.Month, 1);
 
         public static bool operator <(MonthYear left, MonthYear right) => Comparer<MonthYear>.Default.Compare(left, right) < 0;
 

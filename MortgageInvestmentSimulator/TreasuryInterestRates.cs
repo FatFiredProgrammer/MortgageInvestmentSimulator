@@ -600,7 +600,7 @@ namespace MortgageInvestmentSimulator
             { new MonthYear(10, 2018), new TreasuryInterestRate(10, 2018, 0.026m) },
         };
 
-        public static TreasuryInterestRate GetRate(MonthYear monthYear)
-            => _rates.TryGetValue(monthYear, out var rate) ? rate : throw new SimulationException($"No treasury rate data for {monthYear}");
+        public static TreasuryInterestRate GetRate(MonthYear now)
+            => _rates.TryGetValue(now, out var rate) ? rate : throw new SimulationException($"No treasury rate data for {now}");
     }
 }

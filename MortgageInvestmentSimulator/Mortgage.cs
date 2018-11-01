@@ -34,6 +34,6 @@ namespace MortgageInvestmentSimulator
 
         /// <inheritdoc />
         public override string ToString()
-            => $"{Amount:C0} mortgage for {Years} years @ {InterestRate:P2}; {Balance:C0} balance with {Payment:C0} payments";
+            => $"{Amount:C0} mortgage for {Years} years @ {InterestRate:P2}; {Balance:C0} balance with {Payment:C0} payment";
     }
 }

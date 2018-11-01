@@ -12,17 +12,23 @@ namespace MortgageInvestmentSimulator
     public sealed class Scenario
     {
         /// <summary>
+        ///     Gets or sets a value indicating whether we should avoid mortgage and pay mortgage down when possible.
+        /// </summary>
+        /// <value><c>true</c> if avoid mortgage; otherwise, <c>false</c>.</value>
+        public bool AvoidMortgage { get; set; }
+
+        /// <summary>
         ///     The starting year of the simulation.
         /// </summary>
         /// <value>The start.</value>
-        public MonthYear Start { get; set; } = new MonthYear(1, 1972);
+        public MonthYear Start { get; set; } = MonthYear.MinMonthYear;
 
         /// <summary>
         ///     The ending year of the simulation.
         ///     The simulation may actually end earlier if we don't have data or we can't fulfill other conditions.
         /// </summary>
         /// <value>The start.</value>
-        public MonthYear End { get; set; } = new MonthYear(1, 2018);
+        public MonthYear End { get; set; } = MonthYear.MaxMonthYear;
 
         /// <summary>
         ///     Gets or sets the number of years that any particular simulation runs.
@@ -80,13 +86,7 @@ namespace MortgageInvestmentSimulator
         ///     Gets or sets a value indicating whether should pay off house at end of simulation.
         /// </summary>
         /// <value><c>true</c> if should pay off house; otherwise, <c>false</c>.</value>
-        public bool ShouldPayOffHouse { get; set; }
-
-        /// <summary>
-        ///     Gets or sets a value indicating whether we should avoid mortgage and pay mortgage down when possible.
-        /// </summary>
-        /// <value><c>true</c> if avoid mortgage; otherwise, <c>false</c>.</value>
-        public bool AvoidMortgage { get; set; }
+        public bool ShouldPayOffHouse { get; set; } = true;
 
         /// <summary>
         ///     Gets or sets the number of months between re-balancing.
@@ -139,6 +139,26 @@ namespace MortgageInvestmentSimulator
         /// <value>The treasury interest tax rate.</value>
         public decimal TreasuryInterestTaxRate { get; set; } = .32m;
 
+        /// <summary>
+        ///     Gets or sets the minimum cash.
+        ///     We don't invest or buy bonds if our cash balance falls below this.
+        ///     Transaction costs would kill us and it just adds a lot of nickels and dimes to the simulation.
+        /// </summary>
+        /// <value>The minimum cash.</value>
+        public decimal MinimumCash { get; set; } = 1000;
+
+        /// <summary>
+        ///     Gets or sets the minimum bond purchase.
+        /// </summary>
+        /// <value>The minimum bond.</value>
+        public decimal MinimumBond { get; set; } = 100;
+
+        /// <summary>
+        ///     Gets or sets the minimum stock purchase
+        /// </summary>
+        /// <value>The minimum stock.</value>
+        public decimal MinimumStock { get; set; } = 500;
+
         /// <inheritdoc />
         public override string ToString()
         {
@@ -146,6 +166,7 @@ namespace MortgageInvestmentSimulator
             text.AppendLine($"Starts {Start} and ends {End}");
             text.AppendLine($"Each simulation is {SimulationYears} years");
             text.AppendLine($"Home value is {HomeValue:C0}");
+            text.AppendLine(AvoidMortgage ? "*Should avoid having a mortgage*" : "*Should invest money*");
             if (MonthlyIncome > 0)
                 text.AppendLine($"Monthly income is {MonthlyIncome:C0}");
             if (StartingCash > 0)
@@ -155,12 +176,13 @@ namespace MortgageInvestmentSimulator
             text.AppendLine($"{OriginationFee:P2} origination fee on loan");
             if (StockPercentage > 0)
                 text.AppendLine($"Invest {StockPercentage:P0} in stocks");
-            if (AvoidMortgage)
-                text.AppendLine("Should avoid having a mortgage");
             if (ShouldPayOffHouse)
                 text.AppendLine("Must pay off house at end of simulation");
             if (AllowRefinance)
                 text.AppendLine($"Allow refinance if costs recouped in {RefinancePayBackMonths} months");
+            text.AppendLine($"{MinimumCash:C0} minimum cash to invest");
+            text.AppendLine($"{MinimumStock:C0} minimum stock to invest");
+            text.AppendLine($"{MinimumBond:C0} minimum bond to invest");
 
             if (RebalanceMonths.HasValue)
                 text.AppendLine($"Should rebalance every {RebalanceMonths} months");

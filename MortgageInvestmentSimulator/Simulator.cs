@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MortgageInvestmentSimulator
 {
@@ -12,32 +14,52 @@ namespace MortgageInvestmentSimulator
 
         public IOutput Output { get; }
 
-        public void Run(Scenario scenario)
+
+        public Result Run(Scenario scenario)
         {
             Output.WriteLine("Mortgage vs Investment Simulator v1.0");
+            Output.WriteLine(null);
             Output.WriteLine("Current Scenario:");
             Output.WriteLine(scenario.ToString());
-            var start = scenario.Start;
-            var success = 0;
-            var failed = 0;
-            while (start <= scenario.End)
+            var result = new Result
             {
+                Start = MonthYear.Constrain(scenario.Start),
+                End = MonthYear.Constrain(scenario.End),
+                AvoidMortgage = scenario.AvoidMortgage,
+            };
+            var now = result.Start;
+            while (now <= result.End)
+            {
+                var simulation = new Simulation(scenario, Output);
                 try
                 {
-                    var simulation = new Simulation(Output);
-                    simulation.Run(scenario, start);
-                    success++;
+                    var netWorth = simulation.Run(now);
+                    result.NetWorths.Add(netWorth);
+                    result.NetGains.Add(netWorth - simulation.ExternalCapital);
+                   result.Success++;
+                }
+                catch (SimulationFailedException exception)
+                {
+                    Output.WriteLine($"*** Simulation {now} failed {exception.When} : {exception.Message} ***");
+                    Output.VerboseLine($"{exception.GetType()}: {exception.Message}");
+                    Output.WriteLine($"{simulation.GetStatus(exception.When)}");
+                    result.Errors.Add($"{now}: {exception.GetType()}: {exception.Message}{Environment.NewLine}{simulation.GetStatus(exception.When)}");
+                    result.Failed++;
                 }
                 catch (Exception exception)
                 {
-                    Output.WriteLine($"*** Simulation Failed in {start} ***");
-                    Output.VerboseLine(exception.Message);
-                    failed++;
+                    Output.WriteLine($"*** Simulation {now} failed : {exception.Message} ***");
+                    Output.VerboseLine($"{exception.GetType()}: {exception.Message}");
+                    result.Errors.Add($"{now}: {exception.GetType()}: {exception.Message}");
+                    result.Failed++;
+                    throw;
                 }
 
-                Output.WriteLine($"*** Simulator completed with {success} successful and {failed} failures ***");
-                start = start.AddMonths(1);
+                now = now.AddMonths(1);
             }
+
+            Output.WriteLine($"{result}");
+            return result;
         }
     }
 }
