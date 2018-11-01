@@ -40,12 +40,12 @@ namespace MortgageInvestmentSimulator
                 {
                     // This is a simulation where, for example, we simply don't make enough money to pay the mortgage
                     // on the first month. I.e. We should never be given a loan.
-                    Output.WriteLine($"*** Simulation {now} invalid : {exception.Message} ***");
+                    Output.WriteLine($"=== Simulation {now} invalid : {exception.Message} ===");
                     result.Invalid++;
                 }
                 catch (SimulationFailedException exception)
                 {
-                    Output.WriteLine($"*** Simulation {now} failed {exception.When} : {exception.Message} ***");
+                    Output.WriteLine($"=== Simulation {now} failed {exception.When} : {exception.Message} ===");
                     Output.VerboseLine($"{exception.GetType()}: {exception.Message}");
                     Output.WriteLine($"{simulation.GetStatus(exception.When)}");
                     result.Errors.Add($"{now}: {exception.GetType()}: {exception.Message}{Environment.NewLine}{simulation.GetStatus(exception.When)}");
@@ -53,7 +53,7 @@ namespace MortgageInvestmentSimulator
                 }
                 catch (Exception exception)
                 {
-                    Output.WriteLine($"*** Simulation {now} failed : {exception.Message} ***");
+                    Output.WriteLine($"=== Simulation {now} failed : {exception.Message} ===");
                     Output.VerboseLine($"{exception.GetType()}: {exception.Message}");
                     result.Errors.Add($"{now}: {exception.GetType()}: {exception.Message}");
                     result.Failed++;

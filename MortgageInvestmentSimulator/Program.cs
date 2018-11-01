@@ -18,7 +18,7 @@ namespace MortgageInvestmentSimulator
                 // Date = new MonthYear(1, 1974),
                 SimulationYears = 20,
                 HomeValue = 200000,
-                MonthlyIncome = 2000,
+                MonthlyIncome = 2500,
                 StartingCash = 0,
                 StockPercentage = .80m,
                 MortgageTerm = MortgageTerm.ThirtyYear,
@@ -44,20 +44,19 @@ namespace MortgageInvestmentSimulator
                 scenario.AvoidMortgage = true;
                 var resultAvoidMortgage = simulator.Run(scenario);
 
-                output.WriteLine("***** Simulation Results *****");
-                output.WriteLine(scenario.GetSummary());
-                output.WriteLine("***** Investing *****");
-                output.WriteLine(resultInvesting.ToString());
-                output.WriteLine("***** Avoiding Mortgage *****");
-                output.WriteLine(resultAvoidMortgage.ToString());
-                output.WriteLine("***** Summary *****");
+                output.WriteLine("# Simulation");
+                output.WriteLine(null);
+                output.WriteLine(scenario.GetSummary().Replace(Environment.NewLine, Environment.NewLine + Environment.NewLine));
+                output.WriteLine(null);
+                output.WriteLine("# Summary");
+                output.WriteLine(null);
                 var failurePercentage = (decimal)resultInvesting.Failed / (resultInvesting.Failed + resultInvesting.Success);
                 output.WriteLine(
                     $"* Investing had an {resultInvesting.AverageNetGain - resultAvoidMortgage.AverageNetGain:C0} average improvement in net worth over avoiding a mortgage. ");
                 output.WriteLine(
                     $"* Investing failed {failurePercentage:P2} of the time.");
                 if (resultInvesting.NetLossCount > 0)
-                    output.WriteLine($"* Investing had {resultInvesting.NetLossCount:N0} of {resultInvesting.Total:N0} simulations ({(decimal)resultInvesting.NetLossCount/resultInvesting.Total:P2}) resulting in a loss in net worth.");
+                    output.WriteLine($"* Investing had {resultInvesting.NetLossCount:N0} of {resultInvesting.Total:N0} simulations ({(decimal)resultInvesting.NetLossCount / resultInvesting.Total:P2}) resulting in a loss in net worth.");
                 var worst = resultInvesting.FindWorst();
                 if (worst.HasValue)
                     output.WriteLine($"* Investing had a worst loss of {worst.Value.Value.ToDollarCents():C0} net worth in simulation starting {worst.Value.Key}.");
@@ -72,10 +71,18 @@ namespace MortgageInvestmentSimulator
                 best = resultAvoidMortgage.FindBest();
                 if (best.HasValue)
                     output.WriteLine($"* Avoiding mortgage had best gain of {best.Value.Value.ToDollarCents():C0} net worth in simulation starting {best.Value.Key}.");
+                output.WriteLine(null);
+                output.WriteLine("# Investing");
+                output.WriteLine(null);
+                output.WriteLine(resultInvesting.ToString().Replace(Environment.NewLine, Environment.NewLine + Environment.NewLine));
+                output.WriteLine(null);
+                output.WriteLine("# Avoiding Mortgage");
+                output.WriteLine(null);
+                output.WriteLine(resultAvoidMortgage.ToString().Replace(Environment.NewLine, Environment.NewLine + Environment.NewLine));
             }
             catch (Exception exception)
             {
-                output.WriteLine("***** Failed *****");
+                output.WriteLine("===== Failed =====");
                 output.WriteLine($"{exception.GetType()}: {exception.Message}");
             }
         }

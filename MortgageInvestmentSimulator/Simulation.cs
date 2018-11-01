@@ -559,7 +559,7 @@ namespace MortgageInvestmentSimulator
         public decimal Run(MonthYear start)
         {
             Output.VerboseLine(null);
-            Output.VerboseLine($"***** {start} Simulation ***** ");
+            Output.VerboseLine($"===== {start} Simulation ===== ");
 
             Initialize(start);
 
@@ -573,7 +573,7 @@ namespace MortgageInvestmentSimulator
                 now = now.AddMonths(1);
             }
 
-            Output.VerboseLine($"***** {now}: Simulation ended");
+            Output.VerboseLine($"===== {now}: Simulation ended");
 
             CloseBooks(now);
 
@@ -696,7 +696,7 @@ namespace MortgageInvestmentSimulator
         private void Simulate(MonthYear now)
         {
             Output.VerboseLine(null);
-            Output.VerboseLine($"***** {now}");
+            Output.VerboseLine($"===== {now}");
             EarnIncome(now);
             RedeemBonds(now);
             CalculateDividends(now);
