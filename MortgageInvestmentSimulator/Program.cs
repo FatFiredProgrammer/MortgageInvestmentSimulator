@@ -16,15 +16,15 @@ namespace MortgageInvestmentSimulator
             var scenario = new Scenario
             {
                 // Date = new MonthYear(1, 1974),
-                SimulationYears = 20,
-                HomeValue = 200000,
-                MonthlyIncome = 2500,
+                SimulationYears = 10,
+                HomeValue = 150000,
+                MonthlyIncome = 7083,
                 StartingCash = 0,
                 StockPercentage = .80m,
                 MortgageTerm = MortgageTerm.ThirtyYear,
-                OriginationFee = .0125m,
+                OriginationFee = 0m,
                 ShouldPayOffHouseAtCompletion = false,
-                AllowRefinance = true,
+                AllowRefinance = false,
                 AllowMortgageInterestDeduction = true,
             };
 
@@ -67,10 +67,10 @@ namespace MortgageInvestmentSimulator
                     output.WriteLine($"* Avoiding mortgage had {resultAvoidMortgage.NetLossCount:N0} of {resultAvoidMortgage.Total:N0} simulations ({(decimal)resultAvoidMortgage.NetLossCount / resultAvoidMortgage.Total:P2}) resulting in a loss in net worth.");
                 worst = resultAvoidMortgage.FindWorst();
                 if (worst.HasValue)
-                    output.WriteLine($"* Avoiding mortgage had a worst loss of {worst.Value.Value.ToDollarCents():C0} net worth in simulation starting {worst.Value.Key}.");
+                    output.WriteLine($"* Avoiding mortgage had a worst gain/loss of {worst.Value.Value.ToDollarCents():C0} net worth in simulation starting {worst.Value.Key}.");
                 best = resultAvoidMortgage.FindBest();
                 if (best.HasValue)
-                    output.WriteLine($"* Avoiding mortgage had best gain of {best.Value.Value.ToDollarCents():C0} net worth in simulation starting {best.Value.Key}.");
+                    output.WriteLine($"* Avoiding mortgage had best gain/loss of {best.Value.Value.ToDollarCents():C0} net worth in simulation starting {best.Value.Key}.");
                 output.WriteLine(null);
                 output.WriteLine("# Investing");
                 output.WriteLine(null);
