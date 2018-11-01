@@ -106,11 +106,11 @@ namespace MortgageInvestmentSimulator
 
             var worst = FindWorst();
             if (worst.HasValue)
-                text.AppendLine($"Worst loss of {worst.Value.Value:C0} in {worst.Value.Key}");
+                text.AppendLine($"Worst loss of {worst.Value.Value:C0} net worth in {worst.Value.Key}");
 
             var best = FindBest();
             if (best.HasValue)
-                text.AppendLine($"Best gain of {best.Value.Value:C0} in {best.Value.Key}");
+                text.AppendLine($"Best gain of {best.Value.Value:C0} net worth in {best.Value.Key}");
 
             if (Errors.Count > 0)
             {
