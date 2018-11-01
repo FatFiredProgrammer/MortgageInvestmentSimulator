@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using JetBrains.Annotations;
 
 namespace MortgageInvestmentSimulator
@@ -26,7 +27,7 @@ namespace MortgageInvestmentSimulator
         public decimal GetValue(MonthYear now)
         {
             var price = Sp500Prices.GetPrice(now);
-            return Shares * price.Price;
+            return (Shares * price.Price).ToDollarCents();
         }
 
         /// <inheritdoc />

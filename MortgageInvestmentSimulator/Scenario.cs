@@ -31,10 +31,17 @@ namespace MortgageInvestmentSimulator
         public MonthYear End { get; set; } = MonthYear.MaxMonthYear.AddYears(-5);
 
         /// <summary>
+        /// Gets or sets the date. If not null, the simulation only runs on this particular date.
+        /// Useful for debugging.
+        /// </summary>
+        /// <value>The date.</value>
+        public MonthYear Date { get; set; }
+
+        /// <summary>
         ///     Gets or sets the number of years that any particular simulation runs.
         /// </summary>
         /// <value>The mortgage years.</value>
-        public int SimulationYears { get; set; } = 10;
+        public int SimulationYears { get; set; } = 20;
 
         /// <summary>
         ///     Gets or sets the cost of the home we have.
@@ -162,7 +169,7 @@ namespace MortgageInvestmentSimulator
         public string GetSummary()
         {
             var text = new StringBuilder();
-            text.AppendLine($"{SimulationYears} year (max) simulations starting {Start} until {End}");
+            text.AppendLine(Date != null ? $"{SimulationYears} year (max) simulation in {Date}" : $"{SimulationYears} year (max) simulations starting {Start} until {End}");
             text.AppendLine($"Home value is {HomeValue:C0}");
             if (StartingCash > 0)
                 text.AppendLine($"Starting cash is {StartingCash:C0}");
@@ -179,32 +186,23 @@ namespace MortgageInvestmentSimulator
         public override string ToString()
         {
             var text = new StringBuilder();
-            text.AppendLine($"Starts {Start} and ends {End}");
+            text.AppendLine(Date != null ? $"One simulation in {Date}" : $"Starts {Start} and ends {End}");
             text.AppendLine($"Each simulation is {SimulationYears} years");
             text.AppendLine($"Home value is {HomeValue:C0}");
             text.AppendLine(AvoidMortgage ? "*Should avoid having a mortgage*" : "*Should invest money*");
-            if (StartingCash > 0)
-                text.AppendLine($"Starting cash is {StartingCash:C0}");
-            if (MonthlyIncome > 0)
-                text.AppendLine($"Monthly income is {MonthlyIncome:C0}");
+            text.AppendLine($"Starting cash is {StartingCash:C0}");
+            text.AppendLine($"Monthly income is {MonthlyIncome:C0}");
             text.AppendLine($"{MortgageTerm.GetYears()} year mortgage");
-            text.AppendLine(MortgageInterestRate != null ? $"Mortgage interest rate is {MortgageInterestRate:P2}" : "Mortgage interest rate is monthly average.");
+            text.AppendLine(MortgageInterestRate != null ? $"Mortgage interest rate is {MortgageInterestRate:P2}" : "Mortgage interest rate is monthly average");
             text.AppendLine($"{OriginationFee:P2} origination fee on loan");
-            if (StockPercentage > 0)
-                text.AppendLine($"Invest {StockPercentage:P0} in stocks");
-            if (ShouldPayOffHouseAtCompletion)
-                text.AppendLine("Must pay off house at end of simulation");
-            if (AllowRefinance)
-                text.AppendLine($"Allow refinance if costs recouped in {RefinancePayBackMonths} months");
+            text.AppendLine($"Invest {StockPercentage:P0} in stocks");
+            text.AppendLine($"{(ShouldPayOffHouseAtCompletion ? "Must" : "Need not")} pay off house at end of simulation");
+            text.AppendLine(AllowRefinance ? $"Allow mortgage refinance if costs recouped in {RefinancePayBackMonths} months" : "Do not allow mortgage refinancing");
             text.AppendLine($"{MinimumCash:C0} minimum cash to invest");
             text.AppendLine($"{MinimumStock:C0} minimum stock to invest");
             text.AppendLine($"{MinimumBond:C0} minimum bond to invest");
-
-            if (RebalanceMonths.HasValue)
-                text.AppendLine($"Should rebalance every {RebalanceMonths} months");
-            if (AllowMortgageInterestDeduction)
-                text.AppendLine($"Allow mortgage interest deduction with a {MarginalTaxRate:P2} marginal tax rate");
-
+            text.AppendLine(RebalanceMonths.HasValue ? $"Should rebalance portfolio every {RebalanceMonths} months" : "No rebalancing of portfolio");
+            text.AppendLine($"{(AllowMortgageInterestDeduction ? "Allow" : "Do NOT allow")} mortgage interest deduction with a {MarginalTaxRate:P2} marginal tax rate");
             text.AppendLine($"{DividendTaxRate:P2} dividend tax rate");
             text.AppendLine($"{CapitalGainsTaxRate:P2} capital gains tax rate");
             text.AppendLine($"{TreasuryInterestTaxRate:P2} treasury tax rate");

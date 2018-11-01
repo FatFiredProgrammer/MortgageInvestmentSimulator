@@ -13,7 +13,7 @@ namespace MortgageInvestmentSimulator
         public Sp500Price(int month, int year, decimal price)
         {
             Date = new MonthYear(month, year);
-            Price = price;
+            Price = price.ToDollarCents();
         }
 
         public MonthYear Date { get; }

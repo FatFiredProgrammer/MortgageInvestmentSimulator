@@ -14,7 +14,7 @@ namespace MortgageInvestmentSimulator
         public Sp500Dividend(int month, int year, decimal dividendPercentage)
         {
             Date = new MonthYear(month, year);
-            DividendPercentage = dividendPercentage;
+            DividendPercentage = dividendPercentage.ToPercent();
         }
 
         public MonthYear Date { get; }

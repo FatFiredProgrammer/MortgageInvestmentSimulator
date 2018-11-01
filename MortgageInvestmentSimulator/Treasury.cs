@@ -54,7 +54,7 @@ namespace MortgageInvestmentSimulator
         /// <param name="years">The years.</param>
         /// <returns>System.Decimal.</returns>
         public static decimal GetFutureValue(decimal presentValue, decimal interestRate, decimal years = 1.0m)
-            => presentValue / (1 - interestRate / 12);
+            => (presentValue / (1 - interestRate / 12)).ToDollarCents();
 
         /// <summary>
         ///     Calculate present value
@@ -64,7 +64,7 @@ namespace MortgageInvestmentSimulator
         /// <param name="years">The years.</param>
         /// <returns>System.Decimal.</returns>
         public static decimal GetPresentValue(decimal futureValue, decimal interestRate, decimal years = 1.0m)
-            => futureValue * (1 - interestRate / 12);
+            => (futureValue * (1 - interestRate / 12)).ToDollarCents();
 
         /// <summary>
         ///     Determines whether the specified now is mature.

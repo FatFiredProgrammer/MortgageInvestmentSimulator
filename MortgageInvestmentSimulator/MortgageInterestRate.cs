@@ -13,7 +13,7 @@ namespace MortgageInvestmentSimulator
         public MortgageInterestRate(int month, int year, decimal interestRate)
         {
             Date = new MonthYear(month, year);
-            InterestRate = interestRate;
+            InterestRate = interestRate.ToPercent();
         }
 
         public MonthYear Date { get; }

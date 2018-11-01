@@ -45,7 +45,7 @@ namespace MortgageInvestmentSimulator
                 else
                     payment = (LoanAmount / Years * 12);
 
-                return Math.Round(payment, 2);
+                return payment.ToDollarCents();
             }
         }
 

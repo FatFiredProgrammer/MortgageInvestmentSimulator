@@ -73,10 +73,11 @@ namespace MortgageInvestmentSimulator
 
         private void AdjustCash(decimal amount)
         {
+            amount = amount.ToDollarCents();
             if (amount < 0)
             {
                 if (Math.Abs(amount) > Cash)
-                    throw new SimulationException($"Withdrawal of {Math.Abs(amount):C0} would overdraw cash balance of {Cash:C0}");
+                    throw new SimulationException($"Withdrawal of {Math.Abs(amount):C2} would overdraw cash balance of {Cash:C2}");
             }
 
             Cash += amount;
@@ -195,11 +196,11 @@ namespace MortgageInvestmentSimulator
 
         private decimal GetBondValues(MonthYear now)
         {
-            return Bonds.Sum(c => c.GetFaceValue(now));
+            return Bonds.Sum(c => c.GetFaceValue(now)).ToDollarCents();
         }
 
         public decimal GetNetWorth(MonthYear now)
-            => HomeValue + Cash - (Mortgage?.Balance ?? 0m) + GetStockValues(now) + GetBondValues(now);
+            => (HomeValue + Cash - (Mortgage?.Balance ?? 0m) + GetStockValues(now) + GetBondValues(now)).ToDollarCents();
 
         public string GetOverview(MonthYear now)
         {
@@ -262,7 +263,7 @@ namespace MortgageInvestmentSimulator
 
         private decimal GetStockValues(MonthYear now)
         {
-            return Stocks.Sum(c => c.GetValue(now));
+            return Stocks.Sum(c => c.GetValue(now)).ToDollarCents();
         }
 
         private void Initialize(MonthYear start)
@@ -293,6 +294,12 @@ namespace MortgageInvestmentSimulator
             }
 
             AdjustCash(-HomeValue);
+
+            if (Scenario.StartingCash <= 0)
+            {
+                if (Mortgage != null && Scenario.MonthlyIncome < Mortgage.Payment)
+                    throw new SimulationInvalidException($"Monthly income of {Scenario.MonthlyIncome:C0} is not enough to cover mortgage payment of {Mortgage.Payment:C0}");
+            }
         }
 
         private void Invest(MonthYear now)
@@ -302,10 +309,10 @@ namespace MortgageInvestmentSimulator
 
             var cash = Cash;
             var stockPercentage = Math.Max(0, Math.Min(Scenario.StockPercentage, 100));
-            var stockAmount = Math.Floor(stockPercentage * cash);
-            BuyStocks(stockAmount, now);
-            var bondAmount = Math.Floor((1 - stockPercentage) * cash);
-            BuyBonds(bondAmount, now);
+            var stockAmount = (stockPercentage * cash).ToDollarCents();
+            BuyStocks(Math.Min(stockAmount, Cash), now);
+            var bondAmount = ((1 - stockPercentage) * cash).ToDollarCents();
+            BuyBonds(Math.Min(bondAmount, Cash), now);
         }
 
         private void MortgageInterestDeduction(Taxes taxes, MonthYear now)
@@ -338,7 +345,7 @@ namespace MortgageInvestmentSimulator
             if (Cash <= 0)
                 return;
 
-            var principal = Math.Min(Mortgage.Balance, Cash);
+            var principal = Math.Min(Mortgage.Balance, Cash).ToDollarCents();
             AdjustCash(-principal);
             Mortgage.Balance -= principal;
             Output.VerboseLine($"Additional mortgage principal of {principal:C0}; remaining balance of {Mortgage.Balance:C0}");
@@ -497,8 +504,8 @@ namespace MortgageInvestmentSimulator
             if (Math.Abs(bondPercentage - desiredBondPercentage) <= thresholdPercentage && Math.Abs(stockPercentage - desiredStockPercentage) <= thresholdPercentage)
                 return;
 
-            var desiredBondAmount = desiredBondPercentage * totalAmount;
-            var desiredStockAmount = desiredStockPercentage * totalAmount;
+            var desiredBondAmount = (desiredBondPercentage * totalAmount).ToDollarCents();
+            var desiredStockAmount = (desiredStockPercentage * totalAmount).ToDollarCents();
 
             const decimal thresholdAmount = 1000;
             if (Math.Abs(desiredBondAmount - bondAmount) < thresholdAmount || Math.Abs(desiredStockAmount - stockAmount) < thresholdAmount)
@@ -506,22 +513,14 @@ namespace MortgageInvestmentSimulator
 
             Output.VerboseLine("Rebalancing");
             if (desiredBondAmount < bondAmount)
-            {
                 SellBonds(bondAmount - desiredBondAmount, now);
-            }
             if (desiredStockAmount < stockAmount)
-            {
                 SellStocks(stockAmount - desiredStockAmount, now);
-            }
 
             if (desiredBondAmount > bondAmount)
-            {
-                BuyBonds(desiredBondAmount - bondAmount, now);
-            }
+                BuyBonds(Math.Min(desiredBondAmount - bondAmount, Cash), now);
             if (desiredStockAmount > stockAmount)
-            {
-                BuyStocks(desiredStockAmount - stockAmount, now);
-            }
+                BuyStocks(Math.Min(desiredStockAmount - stockAmount, Cash), now);
         }
 
         private void RedeemBond(Treasury bond)
@@ -589,9 +588,9 @@ namespace MortgageInvestmentSimulator
         private bool ScroungeMoney(decimal amount, MonthYear now)
         {
             if (Cash < amount)
-                SellBonds(Math.Ceiling(amount - Cash), now);
+                SellBonds(Math.Ceiling(amount - Cash).ToDollarCents(), now);
             if (Cash < amount)
-                SellStocks(Math.Ceiling(amount - Cash), now);
+                SellStocks(Math.Ceiling(amount - Cash).ToDollarCents(), now);
 
             return Cash >= amount;
         }

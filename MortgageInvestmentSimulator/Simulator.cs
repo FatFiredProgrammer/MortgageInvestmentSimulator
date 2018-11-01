@@ -18,10 +18,11 @@ namespace MortgageInvestmentSimulator
             Output.WriteLine(null);
             Output.WriteLine("Current Scenario:");
             Output.WriteLine(scenario.ToString());
+
             var result = new Result
             {
-                Start = MonthYear.Constrain(scenario.Start),
-                End = MonthYear.Constrain(scenario.End),
+                Start = MonthYear.Constrain(scenario.Date ?? scenario.Start),
+                End = MonthYear.Constrain(scenario.Date ?? scenario.End),
                 AvoidMortgage = scenario.AvoidMortgage,
             };
             var now = result.Start;
@@ -34,6 +35,13 @@ namespace MortgageInvestmentSimulator
                     result.NetWorths.Add(new MonthYear(now), netWorth);
                     result.NetGains.Add(new MonthYear(now), netWorth - simulation.ExternalCapital);
                     result.Success++;
+                }
+                catch (SimulationInvalidException exception)
+                {
+                    // This is a simulation where, for example, we simply don't make enough money to pay the mortgage
+                    // on the first month. I.e. We should never be given a loan.
+                    Output.WriteLine($"*** Simulation {now} invalid : {exception.Message} ***");
+                    result.Invalid++;
                 }
                 catch (SimulationFailedException exception)
                 {
