@@ -44,6 +44,8 @@ namespace MortgageInvestmentSimulator
                 scenario.AvoidMortgage = true;
                 var resultAvoidMortgage = simulator.Run(scenario);
 
+                output.WriteLine("***** Simulation Results *****");
+                output.WriteLine(scenario.GetSummary());
                 output.WriteLine("***** Investing *****");
                 output.WriteLine(resultInvesting.ToString());
                 output.WriteLine("***** Avoiding Mortgage *****");

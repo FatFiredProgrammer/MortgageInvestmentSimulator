@@ -159,6 +159,22 @@ namespace MortgageInvestmentSimulator
         /// <value>The minimum stock.</value>
         public decimal MinimumStock { get; set; } = 500;
 
+        public string GetSummary()
+        {
+            var text = new StringBuilder();
+            text.AppendLine($"{SimulationYears} year (max) simulations starting {Start} until {End}");
+            text.AppendLine($"Home value is {HomeValue:C0}");
+            if (StartingCash > 0)
+                text.AppendLine($"Starting cash is {StartingCash:C0}");
+            if (MonthlyIncome > 0)
+                text.AppendLine($"Monthly income is {MonthlyIncome:C0}");
+            text.AppendLine($"{MortgageTerm.GetYears()} year mortgage");
+            if (StockPercentage > 0)
+                text.AppendLine($"Invest {StockPercentage:P0} in stocks");
+
+            return text.ToString().TrimEnd();
+        }
+
         /// <inheritdoc />
         public override string ToString()
         {
@@ -167,10 +183,10 @@ namespace MortgageInvestmentSimulator
             text.AppendLine($"Each simulation is {SimulationYears} years");
             text.AppendLine($"Home value is {HomeValue:C0}");
             text.AppendLine(AvoidMortgage ? "*Should avoid having a mortgage*" : "*Should invest money*");
-            if (MonthlyIncome > 0)
-                text.AppendLine($"Monthly income is {MonthlyIncome:C0}");
             if (StartingCash > 0)
                 text.AppendLine($"Starting cash is {StartingCash:C0}");
+            if (MonthlyIncome > 0)
+                text.AppendLine($"Monthly income is {MonthlyIncome:C0}");
             text.AppendLine($"{MortgageTerm.GetYears()} year mortgage");
             text.AppendLine(MortgageInterestRate != null ? $"Mortgage interest rate is {MortgageInterestRate:P2}" : "Mortgage interest rate is monthly average.");
             text.AppendLine($"{OriginationFee:P2} origination fee on loan");

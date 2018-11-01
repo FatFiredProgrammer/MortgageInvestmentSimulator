@@ -95,10 +95,10 @@ namespace MortgageInvestmentSimulator
             text.AppendLine($"Simulation from {Start} to {End}");
             text.AppendLine(AvoidMortgage ? "*Should avoid having a mortgage*" : "*Should invest money*");
             text.AppendLine($"{Success:N0} successful and {Failed:N0} failures");
-            text.AppendLine($"Net worth {AverageNetWorth:C0} average; {MedianNetWorth:C0} median");
+            text.AppendLine($"Final Net worth {AverageNetWorth:C0} average; {MedianNetWorth:C0} median");
             if (NetGains.Count > 0)
             {
-                text.AppendLine($"Net worth gain {AverageNetGain:C0} average; {MedianNetGain:C0} median; {NetGains.Values.Min():C0} minimum; {NetGains.Values.Max():C0} maximum");
+                text.AppendLine($"Net worth *gain* {AverageNetGain:C0} average; {MedianNetGain:C0} median; {NetGains.Values.Min():C0} minimum; {NetGains.Values.Max():C0} maximum");
                 var lossCount = NetLossCount;
                 if (lossCount > 0)
                     text.AppendLine($"{lossCount:N0} net worth losses; {NetLossTotal / NetLossCount:C0} average loss; {Math.Abs(NetGains.Values.Min()):C0} worst loss");
