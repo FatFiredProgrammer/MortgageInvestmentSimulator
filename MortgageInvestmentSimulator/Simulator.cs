@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace MortgageInvestmentSimulator
 {
@@ -13,7 +11,6 @@ namespace MortgageInvestmentSimulator
             => Output = output ?? throw new ArgumentNullException(nameof(output));
 
         public IOutput Output { get; }
-
 
         public Result Run(Scenario scenario)
         {
@@ -34,9 +31,9 @@ namespace MortgageInvestmentSimulator
                 try
                 {
                     var netWorth = simulation.Run(now);
-                    result.NetWorths.Add(netWorth);
-                    result.NetGains.Add(netWorth - simulation.ExternalCapital);
-                   result.Success++;
+                    result.NetWorths.Add(new MonthYear(now), netWorth);
+                    result.NetGains.Add(new MonthYear(now), netWorth - simulation.ExternalCapital);
+                    result.Success++;
                 }
                 catch (SimulationFailedException exception)
                 {

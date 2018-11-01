@@ -130,7 +130,7 @@ namespace MortgageInvestmentSimulator
             var dividend1 = Sp500Dividends.GetDividend(now);
             var dividend2 = Sp500Dividends.GetDividend(now.AddMonths(-1));
             var dividend3 = Sp500Dividends.GetDividend(now.AddMonths(-2));
-            var dividendPercentage = (dividend1.DividendPercentage+ dividend2.DividendPercentage+ dividend3.DividendPercentage) / 3;
+            var dividendPercentage = (dividend1.DividendPercentage + dividend2.DividendPercentage + dividend3.DividendPercentage) / 3;
 
             decimal dividends = 0;
             foreach (var sp500 in Stocks)
@@ -164,7 +164,7 @@ namespace MortgageInvestmentSimulator
             Output.VerboseLine("Closing books");
 
             CheckMortgageIsPaid();
-            if (Scenario.ShouldPayOffHouse)
+            if (Scenario.ShouldPayOffHouseAtCompletion)
                 PayOffHouse(now);
 
             RedeemBonds(now);
@@ -200,6 +200,22 @@ namespace MortgageInvestmentSimulator
 
         public decimal GetNetWorth(MonthYear now)
             => HomeValue + Cash - (Mortgage?.Balance ?? 0m) + GetStockValues(now) + GetBondValues(now);
+
+        public string GetOverview(MonthYear now)
+        {
+            var text = new StringBuilder();
+            text.AppendLine($"{GetNetWorth(now):C0} net worth and {GetNetWorth(now) - ExternalCapital:C0} gain/loss over contributions");
+            text.AppendLine($"{Cash:C0} cash");
+            if (Mortgage != null)
+                text.AppendLine($"{Mortgage}");
+            if (Bonds.Count > 0)
+                text.AppendLine($"{Bonds.Count:N0} bonds with value {GetBondValues(now):C0}");
+
+            if (Stocks.Count > 0)
+                text.AppendLine($"{Stocks.Count:N0} stocks with value {GetStockValues(now):C0}");
+
+            return text.ToString().TrimEnd();
+        }
 
         public string GetStatus(MonthYear now)
         {
@@ -261,12 +277,13 @@ namespace MortgageInvestmentSimulator
             {
                 // Buy house straight out
                 if (Cash >= HomeValue)
-                    AdjustCash(-HomeValue);
+                {
+                    /* Nothing here - pay off later */
+                }
                 else
                 {
                     // Pay what we can
                     TakeOutMortgage(Scenario.HomeValue - Cash, start);
-                    AdjustCash(-Cash);
                 }
             }
             else
@@ -274,6 +291,8 @@ namespace MortgageInvestmentSimulator
                 // Borrow as much as we can.
                 TakeOutMortgage(Scenario.HomeValue, start);
             }
+
+            AdjustCash(-HomeValue);
         }
 
         private void Invest(MonthYear now)
@@ -281,10 +300,11 @@ namespace MortgageInvestmentSimulator
             if (Cash <= Math.Max(0, Scenario.MinimumCash))
                 return;
 
+            var cash = Cash;
             var stockPercentage = Math.Max(0, Math.Min(Scenario.StockPercentage, 100));
-            var stockAmount = Math.Floor(stockPercentage * Cash);
+            var stockAmount = Math.Floor(stockPercentage * cash);
             BuyStocks(stockAmount, now);
-            var bondAmount = Math.Floor((1 - stockPercentage) * Cash);
+            var bondAmount = Math.Floor((1 - stockPercentage) * cash);
             BuyBonds(bondAmount, now);
         }
 
@@ -451,7 +471,6 @@ namespace MortgageInvestmentSimulator
 
         private void Rebalance(MonthYear now)
         {
-            // TODO:
             // Check if we are even re-balancing.
             if (!Scenario.RebalanceMonths.HasValue)
                 return;
@@ -461,19 +480,60 @@ namespace MortgageInvestmentSimulator
                 return;
 
             MonthsUntilRebalance = Scenario.RebalanceMonths.Value;
+
+            var bondAmount = GetBondValues(now);
+            var stockAmount = GetStockValues(now);
+            if (bondAmount + stockAmount <= 0)
+                return;
+
+            var totalAmount = bondAmount + stockAmount;
+            var bondPercentage = bondAmount / totalAmount;
+            var stockPercentage = stockAmount / totalAmount;
+            var desiredStockPercentage = Math.Max(0, Math.Min(Scenario.StockPercentage, 100));
+            var desiredBondPercentage = 1 - desiredStockPercentage;
+
+            const decimal thresholdPercentage = .01m;
+
+            if (Math.Abs(bondPercentage - desiredBondPercentage) <= thresholdPercentage && Math.Abs(stockPercentage - desiredStockPercentage) <= thresholdPercentage)
+                return;
+
+            var desiredBondAmount = desiredBondPercentage * totalAmount;
+            var desiredStockAmount = desiredStockPercentage * totalAmount;
+
+            const decimal thresholdAmount = 1000;
+            if (Math.Abs(desiredBondAmount - bondAmount) < thresholdAmount || Math.Abs(desiredStockAmount - stockAmount) < thresholdAmount)
+                return;
+
+            Output.VerboseLine("Rebalancing");
+            if (desiredBondAmount < bondAmount)
+            {
+                SellBonds(bondAmount - desiredBondAmount, now);
+            }
+            if (desiredStockAmount < stockAmount)
+            {
+                SellStocks(stockAmount - desiredStockAmount, now);
+            }
+
+            if (desiredBondAmount > bondAmount)
+            {
+                BuyBonds(desiredBondAmount - bondAmount, now);
+            }
+            if (desiredStockAmount > stockAmount)
+            {
+                BuyStocks(desiredStockAmount - stockAmount, now);
+            }
         }
 
-        private void RedeemBond(Treasury treasury)
+        private void RedeemBond(Treasury bond)
         {
-            // TODO:
-            AdjustCash(treasury.Par);
-            CurrentTaxes.TreasuryInterest += treasury.Par - treasury.Purchase;
-            Bonds.Remove(treasury);
+            AdjustCash(bond.Par);
+            CurrentTaxes.TreasuryInterest += bond.Par - bond.Purchase;
+            Bonds.Remove(bond);
+            Output.VerboseLine($"Redeemed {bond.Par:C0} bond with {bond.Purchase:C0} purchase; {bond.Par - bond.Purchase:C0} gain/loss");
         }
 
         private void RedeemBonds(MonthYear now)
         {
-            // TODO:
             var matured = Bonds.Where(c => c.IsMatured(now)).ToList();
             foreach (var treasury in matured)
             {
@@ -483,7 +543,6 @@ namespace MortgageInvestmentSimulator
 
         private void Refinance(MonthYear now)
         {
-            // TODO:
             // Check if we should refinance.
             if (!ShouldRefinance(now))
                 return;
@@ -491,20 +550,27 @@ namespace MortgageInvestmentSimulator
             var mortgage = Mortgage;
             Mortgage = null;
 
+            Output.VerboseLine($"Refinancing {mortgage}");
             TakeOutMortgage(mortgage.Balance, now);
+
+            // Must remember to pay off the old loan
+            AdjustCash(-mortgage.Balance);
         }
 
         public decimal Run(MonthYear start)
         {
             Output.VerboseLine(null);
-            Output.VerboseLine($"***** {start} ***** ");
+            Output.VerboseLine($"***** {start} Simulation ***** ");
 
             Initialize(start);
+
             var now = MonthYear.Constrain(start);
             var end = MonthYear.Constrain(now.AddYears(Scenario.SimulationYears));
             while (now < end)
             {
                 Simulate(now);
+                Output.VerboseLine(GetOverview(now));
+
                 now = now.AddMonths(1);
             }
 
@@ -522,7 +588,6 @@ namespace MortgageInvestmentSimulator
 
         private bool ScroungeMoney(decimal amount, MonthYear now)
         {
-            // TODO:
             if (Cash < amount)
                 SellBonds(Math.Ceiling(amount - Cash), now);
             if (Cash < amount)
@@ -533,31 +598,35 @@ namespace MortgageInvestmentSimulator
 
         private decimal SellBond(Treasury bond, decimal amount, MonthYear now)
         {
-            // TODO:
             var faceValue = bond.GetFaceValue(now);
             if (faceValue <= amount)
             {
-                CurrentTaxes.TreasuryInterest = faceValue - bond.Purchase;
+                var profit = faceValue - bond.Purchase;
+                CurrentTaxes.TreasuryInterest = profit;
                 AdjustCash(faceValue);
                 Bonds.Remove(bond);
+                Output.VerboseLine($"Sold {bond.Par:C0} bond with {bond.Purchase:C0} purchase; {profit:C0} gain/loss");
                 return faceValue;
             }
 
             var percentage = amount / faceValue;
             Debug.Assert(percentage >= 0 && percentage <= 1m);
-            CurrentTaxes.TreasuryInterest = (faceValue - bond.Purchase) * percentage;
+            var fractionalProfit = (faceValue - bond.Purchase) * percentage;
+            CurrentTaxes.TreasuryInterest = fractionalProfit;
             AdjustCash(faceValue * percentage);
+
+            Output.VerboseLine($"Sold {percentage:P2} of {bond.Par:C0} bond with {bond.Purchase:C0} purchase; {fractionalProfit:C0} gain/loss");
 
             bond.Par *= (1 - percentage);
             bond.Purchase *= (1 - percentage);
             Debug.Assert(bond.Par > 0);
             Debug.Assert(bond.Par > bond.Purchase);
+            Output.VerboseLine($"Adjusted {bond}");
             return amount;
         }
 
         private void SellBonds(decimal amount, MonthYear now)
         {
-            // TODO:
             while (amount > 0 && Bonds.Any())
             {
                 // No tax calc here. Just take the first.
@@ -568,28 +637,30 @@ namespace MortgageInvestmentSimulator
 
         private decimal SellStock(Sp500 stock, decimal amount, MonthYear now)
         {
-            // TODO:
             var price = Sp500Prices.GetPrice(now);
             if (stock.Shares * price.Price <= amount)
             {
                 var sale = stock.Shares * price.Price;
                 var basis = stock.Shares * stock.BasisPrice;
-                CurrentTaxes.CapitalGains = amount - basis;
+                var capitalGain = amount - basis;
+                CurrentTaxes.CapitalGains = capitalGain;
                 AdjustCash(sale);
                 Stocks.Remove(stock);
+                Output.VerboseLine($"Sold {stock.Shares:N2} shares at {price.Price:C0} for {sale:C0}; {capitalGain:C0} capital gain");
                 return sale;
             }
 
             var shares = amount / price.Price;
             stock.Shares -= shares;
-            CurrentTaxes.CapitalGains = shares * (price.Price - stock.BasisPrice);
+            var partialCapitalGains = shares * (price.Price - stock.BasisPrice);
+            CurrentTaxes.CapitalGains = partialCapitalGains;
             AdjustCash(amount);
+            Output.VerboseLine($"Sold {stock.Shares:N2} shares at {price.Price:C0} for {amount:C0}; {partialCapitalGains:C0} capital gain");
             return amount;
         }
 
         private void SellStocks(decimal amount, MonthYear now)
         {
-            // TODO:
             while (amount > 0 && Stocks.Any())
             {
                 // Take highest price to reduce our taxes.
@@ -601,7 +672,6 @@ namespace MortgageInvestmentSimulator
 
         private bool ShouldRefinance(MonthYear now)
         {
-            // TODO:
             if (!Scenario.AllowRefinance)
                 return false;
 
@@ -614,8 +684,8 @@ namespace MortgageInvestmentSimulator
 
             var months = Math.Max(1, Scenario.RefinancePayBackMonths);
 
-            var costOfRefinance = Mortgage.Balance * Scenario.OriginationFee;
             var currentPayment = Mortgage.Payment;
+            var costOfRefinance = Mortgage.Balance * Math.Max(0, Scenario.OriginationFee);
 
             var newPayment = PaymentCalculator.CalculatePayment(Mortgage.Balance + costOfRefinance, rate.InterestRate, Mortgage.Years);
             if (newPayment >= currentPayment)
@@ -663,6 +733,7 @@ namespace MortgageInvestmentSimulator
                 InterestRate = rate.Value,
                 Payment = PaymentCalculator.CalculatePayment(amountOrigination, rate.Value, years),
             };
+            AdjustCash(amount);
             Output.VerboseLine($"Take out {amount:C0} mortgage with {origination:C0} origination");
             Output.VerboseLine($"{Mortgage}");
         }

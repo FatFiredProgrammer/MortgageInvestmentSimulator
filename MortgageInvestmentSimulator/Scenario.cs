@@ -28,7 +28,7 @@ namespace MortgageInvestmentSimulator
         ///     The simulation may actually end earlier if we don't have data or we can't fulfill other conditions.
         /// </summary>
         /// <value>The start.</value>
-        public MonthYear End { get; set; } = MonthYear.MaxMonthYear;
+        public MonthYear End { get; set; } = MonthYear.MaxMonthYear.AddYears(-5);
 
         /// <summary>
         ///     Gets or sets the number of years that any particular simulation runs.
@@ -86,7 +86,7 @@ namespace MortgageInvestmentSimulator
         ///     Gets or sets a value indicating whether should pay off house at end of simulation.
         /// </summary>
         /// <value><c>true</c> if should pay off house; otherwise, <c>false</c>.</value>
-        public bool ShouldPayOffHouse { get; set; } = true;
+        public bool ShouldPayOffHouseAtCompletion { get; set; } = true;
 
         /// <summary>
         ///     Gets or sets the number of months between re-balancing.
@@ -105,7 +105,7 @@ namespace MortgageInvestmentSimulator
         ///     We refinance if we regain our refinancing fee within this number of months.
         /// </summary>
         /// <value>The refinance pay back months.</value>
-        public int RefinancePayBackMonths { get; set; } = 60;
+        public int RefinancePayBackMonths { get; set; } = 4 * 12;
 
         /// <summary>
         ///     Gets or sets the marginal tax rate.
@@ -151,7 +151,7 @@ namespace MortgageInvestmentSimulator
         ///     Gets or sets the minimum bond purchase.
         /// </summary>
         /// <value>The minimum bond.</value>
-        public decimal MinimumBond { get; set; } = 100;
+        public decimal MinimumBond { get; set; } = 500;
 
         /// <summary>
         ///     Gets or sets the minimum stock purchase
@@ -176,7 +176,7 @@ namespace MortgageInvestmentSimulator
             text.AppendLine($"{OriginationFee:P2} origination fee on loan");
             if (StockPercentage > 0)
                 text.AppendLine($"Invest {StockPercentage:P0} in stocks");
-            if (ShouldPayOffHouse)
+            if (ShouldPayOffHouseAtCompletion)
                 text.AppendLine("Must pay off house at end of simulation");
             if (AllowRefinance)
                 text.AppendLine($"Allow refinance if costs recouped in {RefinancePayBackMonths} months");
