@@ -743,6 +743,12 @@ namespace MortgageInvestmentSimulator
                 Simulate(now);
                 if (IsFinanciallySecure(now))
                     result.FinanciallySecureMonths++;
+                else
+                {
+                    IsFinanciallySecure(now);
+                    Debug.WriteLine("ASDASD");
+
+                }
 
                 Output.VerboseLine(GetOverview(now));
 
@@ -894,10 +900,10 @@ namespace MortgageInvestmentSimulator
             if (amount <= 0)
                 return null;
 
-            var rate = start < MonthYear.Min ? Scenario.MortgageInterestRate : MortgageInterestRates.GetRate(start, Scenario.MortgageTerm).InterestRate;
+            var rate = (start < MonthYear.Min ? Scenario.MortgageInterestRate : MortgageInterestRates.GetRate(start, Scenario.MortgageTerm).InterestRate).ToPercent();
 
-            var origination = amount * Math.Max(0, Scenario.OriginationFee);
-            var amountOrigination = amount + origination;
+            var origination = amount * Math.Max(0, Scenario.OriginationFee).ToDollarCents();
+            var amountOrigination = (amount + origination).ToDollarCents();
             var years = Scenario.MortgageTerm.GetYears();
             var mortgage = new Mortgage
             {
