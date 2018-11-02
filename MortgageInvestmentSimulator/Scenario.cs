@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Text;
 using JetBrains.Annotations;
 
@@ -32,6 +33,8 @@ namespace MortgageInvestmentSimulator
             MortgageTerm = other.MortgageTerm;
             OriginationFee = other.OriginationFee;
             ShouldPayOffHouseAtCompletion = other.ShouldPayOffHouseAtCompletion;
+            ShouldAdjustForInflation = other.ShouldAdjustForInflation;
+            ShouldAdjustMonthlyIncomeForInflation = other.ShouldAdjustMonthlyIncomeForInflation;
             RebalanceMonths = other.RebalanceMonths;
             AllowRefinance = other.AllowRefinance;
             RefinancePayBackMonths = other.RefinancePayBackMonths;
@@ -95,7 +98,7 @@ namespace MortgageInvestmentSimulator
         ///     This value was the median monthly rate from 1970 - 2018 for a 30 yr loan.
         /// </summary>
         /// <value>The mortgage interest rate.</value>
-        public decimal? MortgageInterestRate { get; set; } = .0768m;
+        public decimal MortgageInterestRate { get; set; } = .0768m;
 
         /// <summary>
         ///     Gets or sets the percentage we invest in stocks.
@@ -122,6 +125,14 @@ namespace MortgageInvestmentSimulator
         /// </summary>
         /// <value><c>true</c> if should pay off house; otherwise, <c>false</c>.</value>
         public bool ShouldPayOffHouseAtCompletion { get; set; } = true;
+
+        /// <summary>
+        ///     Gets or sets a value indicating whether should adjust for inflation.
+        /// </summary>
+        /// <value><c>true</c> if should adjust for inflation; otherwise, <c>false</c>.</value>
+        public bool ShouldAdjustForInflation { get; set; } = true;
+
+        public bool ShouldAdjustMonthlyIncomeForInflation { get; set; }
 
         /// <summary>
         ///     Gets or sets the number of months between re-balancing.
@@ -194,6 +205,47 @@ namespace MortgageInvestmentSimulator
         /// <value>The minimum stock.</value>
         public decimal MinimumStock { get; set; } = 500;
 
+        public void Clean()
+        {
+            Start = MonthYear.Constrain(Date ?? Start);
+            End = MonthYear.Constrain(Date ?? End);
+            if (Start > End)
+            {
+                var temp = Start;
+                Start = End;
+                End = temp;
+            }
+
+            SimulationYears = Math.Max(1, Math.Min(SimulationYears, 30));
+
+            var maxEnd = MonthYear.Max.AddYears(-SimulationYears);
+            if (End > maxEnd)
+                End = maxEnd;
+            if (End < Start)
+                End = Start;
+
+            HomeValue = Math.Max(1, Math.Min(HomeValue, 10000000));
+            MonthlyIncome = Math.Max(0, Math.Min(MonthlyIncome, 100000));
+            StartingCash = Math.Max(0, Math.Min(StartingCash, 10000000));
+
+            MortgageInterestRate = Math.Max(0.001m, Math.Min(MortgageInterestRate, 100m));
+
+            StockPercentage = Math.Max(0, Math.Min(StockPercentage, 1));
+            OriginationFee = Math.Max(0, Math.Min(OriginationFee, 1));
+            if (RebalanceMonths.HasValue)
+                RebalanceMonths = Math.Max(1, Math.Min(RebalanceMonths.Value, 120));
+            RefinancePayBackMonths = Math.Max(1, Math.Min(RefinancePayBackMonths, 360));
+            MarginalTaxRate = Math.Max(0, Math.Min(MarginalTaxRate, 1));
+            DividendTaxRate = Math.Max(0, Math.Min(DividendTaxRate, 1));
+            CapitalGainsTaxRate = Math.Max(0, Math.Min(CapitalGainsTaxRate, 1));
+            TreasuryInterestTaxRate = Math.Max(0, Math.Min(TreasuryInterestTaxRate, 1));
+            MinimumCash = Math.Max(1, Math.Min(MinimumCash, 10000000));
+            MinimumBond = Math.Max(1, Math.Min(MinimumBond, 10000000));
+            MinimumStock = Math.Max(1, Math.Min(MinimumStock, 10000000));
+            if (!ShouldAdjustForInflation)
+                ShouldAdjustMonthlyIncomeForInflation = false;
+        }
+
         public string GetSummary()
         {
             var text = new StringBuilder();
@@ -220,10 +272,12 @@ namespace MortgageInvestmentSimulator
             text.AppendLine($"Starting cash is {StartingCash:C0}");
             text.AppendLine($"Monthly income is {MonthlyIncome:C0}");
             text.AppendLine($"{MortgageTerm.GetYears()} year mortgage");
-            text.AppendLine(MortgageInterestRate != null ? $"Mortgage interest rate is {MortgageInterestRate:P2}" : "Mortgage interest rate is monthly average");
+            text.AppendLine($"Default mortgage interest rate is {MortgageInterestRate:P2}");
             text.AppendLine($"{OriginationFee:P2} origination fee on loan");
             text.AppendLine($"Invest {StockPercentage:P0} in stocks");
             text.AppendLine($"{(ShouldPayOffHouseAtCompletion ? "Must" : "Need not")} pay off house at end of simulation");
+            text.AppendLine($"{(ShouldAdjustForInflation ? "Should" : "Should not")} adjust for inflation");
+            text.AppendLine($"{(ShouldAdjustMonthlyIncomeForInflation ? "Should" : "Should not")} adjust monthly for inflation");
             text.AppendLine(AllowRefinance ? $"Allow mortgage refinance if costs recouped in {RefinancePayBackMonths} months" : "Do not allow mortgage refinancing");
             text.AppendLine($"{MinimumCash:C0} minimum cash to invest");
             text.AppendLine($"{MinimumStock:C0} minimum stock to invest");
@@ -238,4 +292,3 @@ namespace MortgageInvestmentSimulator
         }
     }
 }
-// TODO: 

@@ -52,7 +52,7 @@ namespace MortgageInvestmentSimulator
         ///     Gets the month year used for the adjustment point for inflation calculations..
         /// </summary>
         /// <value>The maximum month year.</value>
-        public static MonthYear Today => new MonthYear(9, 2018);
+        public static MonthYear BaseLine => new MonthYear(9, 2018);
 
         public int Year { get; }
 

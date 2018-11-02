@@ -16,16 +16,18 @@ namespace MortgageInvestmentSimulator
             var scenario = new Scenario
             {
                 // Date = new MonthYear(1, 1974),
+                 Start =  new MonthYear(1, 1973),
+                 End =  new MonthYear(1, 1984),
                 SimulationYears = 15,
-                HomeValue = 150000,
-                MonthlyIncome = 7083,
+                HomeValue = 200000,
+                MonthlyIncome = 3000,
                 StartingCash = 0,
                 StockPercentage = .80m,
                 MortgageTerm = MortgageTerm.ThirtyYear,
-                OriginationFee = 0m,
+                // OriginationFee = .0125,
                 ShouldPayOffHouseAtCompletion = false,
-                AllowRefinance = false,
-                AllowMortgageInterestDeduction = true,
+                // AllowRefinance = false,
+                // AllowMortgageInterestDeduction = true,
             };
 
             var verbose = args.Any(c => string.Equals(c, "-v", StringComparison.CurrentCultureIgnoreCase)) || args.Any(c => string.Equals(c, "--verbose", StringComparison.CurrentCultureIgnoreCase));

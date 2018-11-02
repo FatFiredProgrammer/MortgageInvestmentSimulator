@@ -18,19 +18,21 @@ namespace MortgageInvestmentSimulator
                 throw new ArgumentNullException(nameof(scenario));
 
             scenario = new Scenario(scenario);
+            scenario.Clean();
 
             Output.WriteLine("Mortgage vs Investment Simulator v1.0");
             Output.WriteLine(null);
             Output.WriteLine("Current Scenario:");
             Output.WriteLine(scenario.ToString());
-
-            scenario.Start = MonthYear.Constrain(scenario.Date ?? scenario.Start);
-            scenario.End = MonthYear.Constrain(scenario.Date ?? scenario.End);
+            Output.WriteLine(null);
+            Output.WriteLine("# Simulation");
+            Output.WriteLine(null);
+            Output.WriteLine(scenario.GetSummary().Replace(Environment.NewLine, Environment.NewLine + Environment.NewLine));
 
             var simulator = new Simulator(Output);
-            var investing = simulator.Run(scenario, Strategy.Invest);
+            var invest = simulator.Run(scenario, Strategy.Invest);
             var avoidMortgage = simulator.Run(scenario, Strategy.AvoidMortgage);
-            return new Summary(investing, avoidMortgage)
+            return new Summary(scenario, invest, avoidMortgage)
             {
                 Start = scenario.Start,
                 End = scenario.End,
@@ -73,7 +75,7 @@ namespace MortgageInvestmentSimulator
                 }
                 catch (Exception exception)
                 {
-                    Output.WriteLine($"=== Simulation {now} failed : {exception.Message} ===");
+                    Output.WriteLine($"=== Simulation {now} error : {exception.Message} ===");
                     Output.VerboseLine($"{exception.GetType()}: {exception.Message}");
                     results.Add(new Result(now, Outcome.Error)
                     {
