@@ -88,7 +88,7 @@ namespace MortgageInvestmentSimulator
         ///     Gets or sets the monthly income that we have to either pay the mortgage or invest.
         /// </summary>
         /// <value>The monthly income.</value>
-        public decimal MonthlyIncome { get; set; } = 1500;
+        public decimal MonthlyIncome { get; set; } = 3000;
 
         public MonthlyIncomeStrategy MonthlyIncomeStrategy { get; set; }
 
@@ -96,7 +96,7 @@ namespace MortgageInvestmentSimulator
         ///     Gets or sets the amount of cash we have at the start.
         /// </summary>
         /// <value>The monthly income.</value>
-        public decimal StartingCash { get; set; } = 200000;
+        public decimal StartingCash { get; set; }
 
         /// <summary>
         ///     Gets or sets the extra payment an investor tries to pay.
@@ -136,7 +136,7 @@ namespace MortgageInvestmentSimulator
         ///     Gets or sets a value indicating whether should pay off house at end of simulation.
         /// </summary>
         /// <value><c>true</c> if should pay off house; otherwise, <c>false</c>.</value>
-        public bool ShouldPayOffHouseAtCompletion { get; set; } = true;
+        public bool ShouldPayOffHouseAtCompletion { get; set; }
 
         /// <summary>
         ///     Gets or sets a value indicating whether should adjust for inflation.
@@ -267,22 +267,6 @@ namespace MortgageInvestmentSimulator
             MinimumCash = Math.Max(1, Math.Min(MinimumCash, 10000000)).ToDollarCents();
             MinimumBond = Math.Max(1, Math.Min(MinimumBond, 10000000)).ToDollarCents();
             MinimumStock = Math.Max(1, Math.Min(MinimumStock, 10000000)).ToDollarCents();
-        }
-
-        public string GetSummary()
-        {
-            var text = new StringBuilder();
-            text.AppendLine(Date != null ? $"{SimulationYears} year (max) simulation in {Date}" : $"{SimulationYears} year (max) simulations starting {Start} until {End}");
-            text.AppendLine($"Home value is {HomeValue:C0}");
-            if (StartingCash > 0)
-                text.AppendLine($"Starting cash is {StartingCash:C0}");
-            if (MonthlyIncome > 0)
-                text.AppendLine($"Monthly income is {MonthlyIncome:C0} with strategy of {MonthlyIncomeStrategy}");
-            text.AppendLine($"{MortgageTerm.GetYears()} year mortgage");
-            if (StockPercentage > 0)
-                text.AppendLine($"Invest {StockPercentage:P0} in stocks");
-
-            return text.ToString().TrimEnd();
         }
 
         /// <inheritdoc />

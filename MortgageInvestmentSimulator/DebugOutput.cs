@@ -12,6 +12,11 @@ namespace MortgageInvestmentSimulator
     public sealed class DebugOutput : IOutput
     {
         /// <inheritdoc />
+        public void Flush()
+        {
+        }
+
+        /// <inheritdoc />
         public void VerboseLine(string text)
         {
             Debug.WriteLine(text ?? string.Empty);

@@ -328,8 +328,7 @@ namespace MortgageInvestmentSimulator
         {
             Output.VerboseLine("Starting simulation");
 
-            Cash = Scenario.ShouldAdjustForInflation ? Inflation.Adjust(Scenario.StartingCash, MonthYear.BaseLine, start) : Scenario.StartingCash;
-
+            Cash = (Scenario.ShouldAdjustForInflation ? Inflation.Adjust(Scenario.StartingCash, MonthYear.BaseLine, start) : Scenario.StartingCash).ToDollarCents();
             ExternalCapital += Scenario.StartingCash;
             MonthsUntilRebalance = Scenario.RebalanceMonths ?? 0;
             InitializeMortgage(start);
@@ -367,9 +366,25 @@ namespace MortgageInvestmentSimulator
                     Output.VerboseLine($"Monthly income is equals monthly payment {MonthlyIncome:C0}");
                     break;
 
+                case MonthlyIncomeStrategy.MortgagePlus50Percent:
+
+                    // Add a dollar so we don't have some rounding failure.
+                    MonthlyIncome = (Mortgage?.Payment ?? Scenario.MonthlyIncome) * 1.5m + 1m;
+                    Output.VerboseLine($"Monthly income is equals 150% monthly payment {MonthlyIncome:C0}");
+                    break;
+
+                case MonthlyIncomeStrategy.MortgagePlus25Percent:
+
+                    // Add a dollar so we don't have some rounding failure.
+                    MonthlyIncome = (Mortgage?.Payment ?? Scenario.MonthlyIncome) * 1.25m + 1m;
+                    Output.VerboseLine($"Monthly income is equals 125% monthly payment {MonthlyIncome:C0}");
+                    break;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
+            MonthlyIncome = MonthlyIncome.ToDollarCents();
         }
 
         private void InitializeMortgage(MonthYear start)
@@ -473,7 +488,7 @@ namespace MortgageInvestmentSimulator
             if (Cash <= 0)
                 return;
 
-            var extraPrincipal = Strategy == Strategy.Invest ? Math.Min(Mortgage.Balance, Cash).ToDollarCents() : Scenario.ExtraPayment;
+            var extraPrincipal = Strategy == Strategy.AvoidMortgage ? Math.Min(Mortgage.Balance, Cash).ToDollarCents() : Scenario.ExtraPayment;
             if (extraPrincipal <= 0)
                 return;
 
@@ -489,7 +504,10 @@ namespace MortgageInvestmentSimulator
                 return;
 
             if (!ScroungeMoney(Mortgage.Payment, now))
+            {
+                Debug.WriteLine(GetStatus(now));
                 throw new SimulationFailedException($"Could not make mortgage payment of {Mortgage.Payment:C0} in {now}") { When = new MonthYear(now) };
+            }
 
             AdjustCash(-Mortgage.Payment);
 
@@ -517,7 +535,10 @@ namespace MortgageInvestmentSimulator
                 return;
 
             if (!ScroungeMoney(Mortgage.Balance, now))
+            {
+                Debug.WriteLine(GetStatus(now));
                 throw new SimulationFailedException($"Could not find {Mortgage.Balance:C0} to pay off loan in {now}") { When = new MonthYear(now) };
+            }
 
             AdjustCash(-Mortgage.Balance);
             Output.VerboseLine($"Paid off mortgage of {Mortgage.Balance:C0}");
@@ -532,7 +553,10 @@ namespace MortgageInvestmentSimulator
                 return;
 
             if (!ScroungeMoney(amount, now))
+            {
+                Debug.WriteLine(GetStatus(now));
                 throw new SimulationFailedException($"Could not pay taxes of {amount:C0} in {now}") { When = new MonthYear(now) };
+            }
 
             AdjustCash(-amount);
             Output.VerboseLine($"Paid taxes of {amount:C0}");

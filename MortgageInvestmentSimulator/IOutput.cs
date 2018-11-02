@@ -5,6 +5,8 @@
     /// </summary>
     public interface IOutput
     {
+        void Flush();
+
         /// <summary>
         ///     Informative text
         /// </summary>

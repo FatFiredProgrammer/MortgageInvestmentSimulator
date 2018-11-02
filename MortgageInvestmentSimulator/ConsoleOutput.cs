@@ -12,6 +12,11 @@ namespace MortgageInvestmentSimulator
     public sealed class ConsoleOutput : IOutput
     {
         /// <inheritdoc />
+        public void Flush()
+        {
+        }
+
+        /// <inheritdoc />
         public void VerboseLine(string text)
         {
         }

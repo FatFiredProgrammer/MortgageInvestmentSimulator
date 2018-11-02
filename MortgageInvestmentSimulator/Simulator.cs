@@ -25,9 +25,6 @@ namespace MortgageInvestmentSimulator
             Output.WriteLine("Current Scenario:");
             Output.WriteLine(scenario.ToString());
             Output.WriteLine(null);
-            Output.WriteLine("# Simulation");
-            Output.WriteLine(null);
-            Output.WriteLine(scenario.GetSummary().Replace(Environment.NewLine, Environment.NewLine + Environment.NewLine));
 
             var simulator = new Simulator(Output);
             var invest = simulator.Run(scenario, Strategy.Invest);
@@ -87,7 +84,7 @@ namespace MortgageInvestmentSimulator
                 now = now.AddMonths(1);
             }
 
-            Output.WriteLine($"{results}");
+            Output.VerboseLine($"{results}");
             return results;
         }
     }
