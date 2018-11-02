@@ -40,13 +40,19 @@ namespace MortgageInvestmentSimulator
         }
 
         /// <summary>
-        /// Gets the minimum month year.
+        ///     Gets the minimum month year.
         /// </summary>
         /// <value>The minimum month year.</value>
         /// <remarks>We start a little later so we can go back and get average dividend.</remarks>
-        public static MonthYear MinMonthYear => new MonthYear(4, 1972);
+        public static MonthYear Min => new MonthYear(4, 1972);
 
-        public static MonthYear MaxMonthYear => new MonthYear(9, 2018);
+        public static MonthYear Max => new MonthYear(9, 2018);
+
+        /// <summary>
+        ///     Gets the month year used for the adjustment point for inflation calculations..
+        /// </summary>
+        /// <value>The maximum month year.</value>
+        public static MonthYear Today => new MonthYear(9, 2018);
 
         public int Year { get; }
 
@@ -78,10 +84,10 @@ namespace MortgageInvestmentSimulator
 
         public static MonthYear Constrain(MonthYear monthYear)
         {
-            if (monthYear < MinMonthYear)
-                return MinMonthYear;
-            if (monthYear > MaxMonthYear)
-                return MaxMonthYear;
+            if (monthYear < Min)
+                return Min;
+            if (monthYear > Max)
+                return Max;
 
             return monthYear;
         }

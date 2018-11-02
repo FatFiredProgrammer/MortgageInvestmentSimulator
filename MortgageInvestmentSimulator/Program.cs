@@ -53,6 +53,9 @@ namespace MortgageInvestmentSimulator
                 var failurePercentage = (decimal)resultInvesting.Failed / (resultInvesting.Failed + resultInvesting.Success);
                 output.WriteLine(
                     $"* Investing had an {resultInvesting.AverageNetGain - resultAvoidMortgage.AverageNetGain:C0} average improvement in net worth over avoiding a mortgage. ");
+                if(resultAvoidMortgage.AverageNetGain > 0)
+                    output.WriteLine(
+                        $"* Investing had an {(resultInvesting.AverageNetGain - resultAvoidMortgage.AverageNetGain) / (resultAvoidMortgage.AverageNetGain):P2} average improvement in net worth over avoiding a mortgage. ");
                 output.WriteLine(
                     $"* Investing failed {failurePercentage:P2} of the time.");
                 if (resultInvesting.NetLossCount > 0)

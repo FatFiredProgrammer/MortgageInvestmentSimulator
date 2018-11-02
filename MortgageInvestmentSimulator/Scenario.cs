@@ -11,6 +11,41 @@ namespace MortgageInvestmentSimulator
     [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public sealed class Scenario
     {
+        public Scenario()
+        {
+        }
+
+        public Scenario(Scenario other)
+        {
+            if (other == null)
+                return;
+
+            AvoidMortgage = other.AvoidMortgage;
+            Start = other.Start;
+            End = other.End;
+            Date = other.Date;
+            SimulationYears = other.SimulationYears;
+            HomeValue = other.HomeValue;
+            MonthlyIncome = other.MonthlyIncome;
+            StartingCash = other.StartingCash;
+            MortgageInterestRate = other.MortgageInterestRate;
+            StockPercentage = other.StockPercentage;
+            MortgageTerm = other.MortgageTerm;
+            OriginationFee = other.OriginationFee;
+            ShouldPayOffHouseAtCompletion = other.ShouldPayOffHouseAtCompletion;
+            RebalanceMonths = other.RebalanceMonths;
+            AllowRefinance = other.AllowRefinance;
+            RefinancePayBackMonths = other.RefinancePayBackMonths;
+            MarginalTaxRate = other.MarginalTaxRate;
+            AllowMortgageInterestDeduction = other.AllowMortgageInterestDeduction;
+            DividendTaxRate = other.DividendTaxRate;
+            CapitalGainsTaxRate = other.CapitalGainsTaxRate;
+            TreasuryInterestTaxRate = other.TreasuryInterestTaxRate;
+            MinimumCash = other.MinimumCash;
+            MinimumBond = other.MinimumBond;
+            MinimumStock = other.MinimumStock;
+        }
+
         /// <summary>
         ///     Gets or sets a value indicating whether we should avoid mortgage and pay mortgage down when possible.
         /// </summary>
@@ -21,18 +56,18 @@ namespace MortgageInvestmentSimulator
         ///     The starting year of the simulation.
         /// </summary>
         /// <value>The start.</value>
-        public MonthYear Start { get; set; } = MonthYear.MinMonthYear;
+        public MonthYear Start { get; set; } = MonthYear.Min;
 
         /// <summary>
         ///     The ending year of the simulation.
         ///     The simulation may actually end earlier if we don't have data or we can't fulfill other conditions.
         /// </summary>
         /// <value>The start.</value>
-        public MonthYear End { get; set; } = MonthYear.MaxMonthYear.AddYears(-5);
+        public MonthYear End { get; set; } = MonthYear.Max.AddYears(-5);
 
         /// <summary>
-        /// Gets or sets the date. If not null, the simulation only runs on this particular date.
-        /// Useful for debugging.
+        ///     Gets or sets the date. If not null, the simulation only runs on this particular date.
+        ///     Useful for debugging.
         /// </summary>
         /// <value>The date.</value>
         public MonthYear Date { get; set; }
@@ -63,11 +98,11 @@ namespace MortgageInvestmentSimulator
         public decimal StartingCash { get; set; } = 200000;
 
         /// <summary>
-        ///     Gets or sets the mortgage interest rate.
-        ///     If not specified, we will use the average rate at the start month.
+        ///     Gets or sets the mortgage interest rate used when no other data is present.
+        ///     This value was the median monthly rate from 1970 - 2018 for a 30 yr loan.
         /// </summary>
         /// <value>The mortgage interest rate.</value>
-        public decimal? MortgageInterestRate { get; set; }
+        public decimal? MortgageInterestRate { get; set; } = .0768m;
 
         /// <summary>
         ///     Gets or sets the percentage we invest in stocks.
