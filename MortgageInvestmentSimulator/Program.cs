@@ -17,21 +17,25 @@ namespace MortgageInvestmentSimulator
             var scenario = new Scenario
             {
                 //Date = new MonthYear(4, 1972),
-                //Start =  new MonthYear(1, 1973),
+                //Start =  new MonthYear(9, 1991),
                 //End =  new MonthYear(1, 1984),
                 //SimulationYears = 15,
-                //HomeValue = 200000,
-                //MonthlyIncome = 3000,
-                //StartingCash = 0,
+                HomeValue = 200000,
+                MonthlyIncome = 2500,
+                // StartingCash = 200000,
                 //StockPercentage = .80m,
-                //MortgageTerm = MortgageTerm.ThirtyYear,
+                //MortgageTerm = MortgageTerm.FifteenYear,
                 //OriginationFee = .0125,
-                //ShouldPayOffHouseAtCompletion = false,
+                ShouldPayOffHouseAtCompletion = true,
                 //ExistingLoanYears = 20,
                 //CashOutAtRefinance = true,
                 //AllowRefinance = false,
                 //AllowMortgageInterestDeduction = true,
-                MonthlyIncomeStrategy = MonthlyIncomeStrategy.MortgagePlus25Percent,
+                // AllowRefinance = false,
+                //MonthlyIncomeStrategy = MonthlyIncomeStrategy.MortgagePlus25Percent,
+                //ShouldAdjustForInflation = true,
+                // ExtraPayment = 1000,
+
             };
 
             var verbose = args.Any(c => string.Equals(c, "-v", StringComparison.CurrentCultureIgnoreCase)) || args.Any(c => string.Equals(c, "--verbose", StringComparison.CurrentCultureIgnoreCase));

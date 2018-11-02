@@ -74,13 +74,16 @@ namespace MortgageInvestmentSimulator
         /// <value>The external capital.</value>
         public decimal ExternalCapital { get; set; }
 
-        private void AdjustCash(decimal amount)
+        private void AdjustCash(decimal amount, MonthYear now)
         {
             amount = amount.ToDollarCents();
             if (amount < 0)
             {
                 if (Math.Abs(amount) > Cash)
+                {
+                    Debug.WriteLine(GetStatus(now));
                     throw new SimulationException($"Withdrawal of {Math.Abs(amount):C2} would overdraw cash balance of {Cash:C2}");
+                }
             }
 
             Cash += amount;
@@ -91,7 +94,7 @@ namespace MortgageInvestmentSimulator
             if (bondAmount <= Math.Max(0, Scenario.MinimumBond))
                 return;
 
-            AdjustCash(-bondAmount);
+            AdjustCash(-bondAmount, now);
 
             var rate = TreasuryInterestRates.GetRate(now);
             var bond = new Treasury
@@ -112,7 +115,7 @@ namespace MortgageInvestmentSimulator
             if (stockAmount <= Math.Max(0, Scenario.MinimumStock))
                 return;
 
-            AdjustCash(-stockAmount);
+            AdjustCash(-stockAmount, now);
 
             var price = Sp500Prices.GetPrice(now);
             var stock = new Sp500
@@ -149,7 +152,7 @@ namespace MortgageInvestmentSimulator
         private decimal CalculateDividends(Sp500 sp500, MonthYear now, decimal dividendPercentage)
         {
             var amount = dividendPercentage * sp500.GetValue(now);
-            AdjustCash(amount);
+            AdjustCash(amount, now);
             CurrentTaxes.Dividends += amount;
             return amount;
         }
@@ -198,7 +201,7 @@ namespace MortgageInvestmentSimulator
                 monthlyIncome = Inflation.Adjust(Scenario.MonthlyIncome, MonthYear.BaseLine, now);
 
             Output.VerboseLine($"Monthly income of {monthlyIncome:C0}");
-            AdjustCash(monthlyIncome);
+            AdjustCash(monthlyIncome, now);
             ExternalCapital += monthlyIncome;
         }
 
@@ -414,17 +417,17 @@ namespace MortgageInvestmentSimulator
                     {
                         // Pay what we can
                         Mortgage = TakeOutMortgage(homeValue - Cash, start);
-                        AdjustCash(Mortgage?.Proceeds ?? 0m);
+                        AdjustCash(Mortgage?.Proceeds ?? 0m, start);
                     }
                 }
                 else
                 {
                     // Borrow as much as we can.
                     Mortgage = TakeOutMortgage(homeValue, start);
-                    AdjustCash(Mortgage?.Proceeds ?? 0m);
+                    AdjustCash(Mortgage?.Proceeds ?? 0m, start);
                 }
 
-                AdjustCash(-homeValue);
+                AdjustCash(-homeValue, start);
             }
         }
 
@@ -474,7 +477,7 @@ namespace MortgageInvestmentSimulator
             if (valueOfDeduction <= 0)
                 return;
 
-            AdjustCash(valueOfDeduction);
+            AdjustCash(valueOfDeduction, now);
             Output.VerboseLine($"Claimed a mortgage interest deduction worth {valueOfDeduction:C0}");
         }
 
@@ -488,11 +491,11 @@ namespace MortgageInvestmentSimulator
             if (Cash <= 0)
                 return;
 
-            var extraPrincipal = Strategy == Strategy.AvoidMortgage ? Math.Min(Mortgage.Balance, Cash).ToDollarCents() : Scenario.ExtraPayment;
+            var extraPrincipal = (Strategy == Strategy.AvoidMortgage ? Math.Min(Mortgage.Balance, Cash) : Math.Min(Cash, Scenario.ExtraPayment)).ToDollarCents();
             if (extraPrincipal <= 0)
                 return;
 
-            AdjustCash(-extraPrincipal);
+            AdjustCash(-extraPrincipal, now);
             Mortgage.Balance -= extraPrincipal;
             Output.VerboseLine($"Additional mortgage principal of {extraPrincipal:C0}; remaining balance of {Mortgage.Balance:C0}");
         }
@@ -509,7 +512,7 @@ namespace MortgageInvestmentSimulator
                 throw new SimulationFailedException($"Could not make mortgage payment of {Mortgage.Payment:C0} in {now}") { When = new MonthYear(now) };
             }
 
-            AdjustCash(-Mortgage.Payment);
+            AdjustCash(-Mortgage.Payment, now);
 
             var interest = Mortgage.Balance * Mortgage.InterestRate / 12;
             CurrentTaxes.MortgageInterest += interest;
@@ -540,7 +543,7 @@ namespace MortgageInvestmentSimulator
                 throw new SimulationFailedException($"Could not find {Mortgage.Balance:C0} to pay off loan in {now}") { When = new MonthYear(now) };
             }
 
-            AdjustCash(-Mortgage.Balance);
+            AdjustCash(-Mortgage.Balance, now);
             Output.VerboseLine($"Paid off mortgage of {Mortgage.Balance:C0}");
 
             Mortgage = null;
@@ -558,7 +561,7 @@ namespace MortgageInvestmentSimulator
                 throw new SimulationFailedException($"Could not pay taxes of {amount:C0} in {now}") { When = new MonthYear(now) };
             }
 
-            AdjustCash(-amount);
+            AdjustCash(-amount, now);
             Output.VerboseLine($"Paid taxes of {amount:C0}");
         }
 
@@ -678,9 +681,9 @@ namespace MortgageInvestmentSimulator
                 BuyStocks(Math.Min(desiredStockAmount - stockAmount, Cash), now);
         }
 
-        private void RedeemBond(Treasury bond)
+        private void RedeemBond(Treasury bond, MonthYear now)
         {
-            AdjustCash(bond.Par);
+            AdjustCash(bond.Par, now);
             CurrentTaxes.TreasuryInterest += bond.Par - bond.Purchase;
             Bonds.Remove(bond);
             Output.VerboseLine($"Redeemed {bond.Par:C0} bond with {bond.Purchase:C0} purchase; {bond.Par - bond.Purchase:C0} gain/loss");
@@ -691,7 +694,7 @@ namespace MortgageInvestmentSimulator
             var matured = Bonds.Where(c => c.IsMatured(now)).ToList();
             foreach (var treasury in matured)
             {
-                RedeemBond(treasury);
+                RedeemBond(treasury, now);
             }
         }
 
@@ -717,10 +720,10 @@ namespace MortgageInvestmentSimulator
 
             Output.VerboseLine($"Refinancing {mortgage}");
             Mortgage = TakeOutMortgage(amount, now);
-            AdjustCash(Mortgage?.Proceeds ?? 0m);
+            AdjustCash(Mortgage?.Proceeds ?? 0m, now);
 
             // Must remember to pay off the old loan
-            AdjustCash(-mortgage?.Balance ?? 0m);
+            AdjustCash(-mortgage?.Balance ?? 0m, now);
         }
 
         public Result Run(MonthYear start)
@@ -779,7 +782,7 @@ namespace MortgageInvestmentSimulator
             {
                 var profit = faceValue - bond.Purchase;
                 CurrentTaxes.TreasuryInterest = profit;
-                AdjustCash(faceValue);
+                AdjustCash(faceValue, now);
                 Bonds.Remove(bond);
                 Output.VerboseLine($"Sold {bond.Par:C0} bond with {bond.Purchase:C0} purchase; {profit:C0} gain/loss");
                 return faceValue;
@@ -789,7 +792,7 @@ namespace MortgageInvestmentSimulator
             Debug.Assert(percentage >= 0 && percentage <= 1m);
             var fractionalProfit = (faceValue - bond.Purchase) * percentage;
             CurrentTaxes.TreasuryInterest = fractionalProfit;
-            AdjustCash(faceValue * percentage);
+            AdjustCash(faceValue * percentage, now);
 
             Output.VerboseLine($"Sold {percentage:P2} of {bond.Par:C0} bond with {bond.Purchase:C0} purchase; {fractionalProfit:C0} gain/loss");
 
@@ -820,7 +823,7 @@ namespace MortgageInvestmentSimulator
                 var basis = stock.Shares * stock.BasisPrice;
                 var capitalGain = amount - basis;
                 CurrentTaxes.CapitalGains = capitalGain;
-                AdjustCash(sale);
+                AdjustCash(sale, now);
                 Stocks.Remove(stock);
                 Output.VerboseLine($"Sold {stock.Shares:N2} shares at {price.Price:C0} for {sale:C0}; {capitalGain:C0} capital gain");
                 return sale;
@@ -830,7 +833,7 @@ namespace MortgageInvestmentSimulator
             stock.Shares -= shares;
             var partialCapitalGains = shares * (price.Price - stock.BasisPrice);
             CurrentTaxes.CapitalGains = partialCapitalGains;
-            AdjustCash(amount);
+            AdjustCash(amount, now);
             Output.VerboseLine($"Sold {stock.Shares:N2} shares at {price.Price:C0} for {amount:C0}; {partialCapitalGains:C0} capital gain");
             return amount;
         }
