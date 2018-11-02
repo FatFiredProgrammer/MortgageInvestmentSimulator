@@ -10,15 +10,18 @@ namespace MortgageInvestmentSimulator
     [PublicAPI]
     public sealed class Simulation
     {
-        public Simulation(Scenario scenario, IOutput output)
+        public Simulation(Scenario scenario, Strategy strategy, IOutput output)
         {
             Output = output ?? throw new ArgumentNullException(nameof(output));
             Scenario = scenario ?? throw new ArgumentNullException(nameof(scenario));
+            Strategy = strategy;
         }
 
         public IOutput Output { get; }
 
         public Scenario Scenario { get; }
+
+        public Strategy Strategy { get; }
 
         /// <summary>
         ///     Gets or sets the cost of the home we have.
@@ -69,6 +72,11 @@ namespace MortgageInvestmentSimulator
         /// <value>The months until rebalance.</value>
         public int MonthsUntilRebalance { set; private get; }
 
+        /// <summary>
+        ///     Gets or sets the external capital.
+        ///     This keeps tracked of how much money we either started with or earned.
+        /// </summary>
+        /// <value>The external capital.</value>
         public decimal ExternalCapital { get; set; }
 
         private void AdjustCash(decimal amount)
@@ -194,6 +202,21 @@ namespace MortgageInvestmentSimulator
             ExternalCapital += Scenario.MonthlyIncome;
         }
 
+        private decimal GetBondLiquidity(Treasury bond, MonthYear now)
+        {
+            var faceValue = bond.GetFaceValue(now);
+            var net = faceValue - bond.Purchase;
+            if (net <= 0)
+                return 0;
+
+            return (faceValue - net * Scenario.TreasuryInterestTaxRate).ToDollarCents();
+        }
+
+        private decimal GetBondLiquidity(MonthYear now)
+        {
+            return Bonds.Sum(c => GetBondLiquidity(c, now));
+        }
+
         private decimal GetBondValues(MonthYear now)
         {
             return Bonds.Sum(c => c.GetFaceValue(now)).ToDollarCents();
@@ -207,14 +230,13 @@ namespace MortgageInvestmentSimulator
             var text = new StringBuilder();
             text.AppendLine($"{GetNetWorth(now):C0} net worth and {GetNetWorth(now) - ExternalCapital:C0} gain/loss over contributions");
             text.AppendLine($"{Cash:C0} cash");
+            text.AppendLine(IsFinanciallySecure(now) ? "Is financially secure" : "Is not financially secure");
             if (Mortgage != null)
                 text.AppendLine($"{Mortgage}");
             if (Bonds.Count > 0)
                 text.AppendLine($"{Bonds.Count:N0} bonds with value {GetBondValues(now):C0}");
-
             if (Stocks.Count > 0)
                 text.AppendLine($"{Stocks.Count:N0} stocks with value {GetStockValues(now):C0}");
-
             return text.ToString().TrimEnd();
         }
 
@@ -261,6 +283,21 @@ namespace MortgageInvestmentSimulator
             return text.ToString().TrimEnd();
         }
 
+        private decimal GetStockLiquidity(Sp500 stock, MonthYear now)
+        {
+            var current = stock.GetValue(now);
+            var net = current - (stock.BasisPrice * stock.Shares);
+            if (net <= 0)
+                return 0;
+
+            return (current - net * Scenario.CapitalGainsTaxRate);
+        }
+
+        private decimal GetStockLiquidity(MonthYear now)
+        {
+            return Stocks.Sum(c => GetStockLiquidity(c, now));
+        }
+
         private decimal GetStockValues(MonthYear now)
         {
             return Stocks.Sum(c => c.GetValue(now)).ToDollarCents();
@@ -274,7 +311,7 @@ namespace MortgageInvestmentSimulator
             Cash = Scenario.StartingCash;
             ExternalCapital += Scenario.StartingCash;
             MonthsUntilRebalance = Scenario.RebalanceMonths ?? 0;
-            if (Scenario.AvoidMortgage)
+            if (Strategy == Strategy.AvoidMortgage)
             {
                 // Buy house straight out
                 if (Cash >= HomeValue)
@@ -315,6 +352,26 @@ namespace MortgageInvestmentSimulator
             BuyBonds(Math.Min(bondAmount, Cash), now);
         }
 
+        /// <summary>
+        ///     Determines whether we are financially secure because we either do
+        ///     now or could own our home.
+        /// </summary>
+        /// <param name="now">The now.</param>
+        /// <returns><c>true</c> if is financially secure; otherwise, <c>false</c>.</returns>
+        private bool IsFinanciallySecure(MonthYear now)
+        {
+            if (Mortgage == null)
+                return true;
+            if (Mortgage.Balance <= 0)
+                return true;
+
+            var amount = Mortgage.Balance;
+            amount -= Cash;
+            amount -= GetBondLiquidity(now);
+            amount -= GetStockLiquidity(now);
+            return amount <= 0;
+        }
+
         private void MortgageInterestDeduction(Taxes taxes, MonthYear now)
         {
             if (!Scenario.AllowMortgageInterestDeduction)
@@ -334,7 +391,7 @@ namespace MortgageInvestmentSimulator
 
         private void PayDownHouse(MonthYear now)
         {
-            if (!Scenario.AvoidMortgage)
+            if (Strategy == Strategy.Invest)
                 return;
 
             CheckMortgageIsPaid();
@@ -556,10 +613,12 @@ namespace MortgageInvestmentSimulator
             AdjustCash(-mortgage.Balance);
         }
 
-        public decimal Run(MonthYear start)
+        public Result Run(MonthYear start)
         {
             Output.VerboseLine(null);
             Output.VerboseLine($"===== {start} Simulation ===== ");
+
+            var result = new Result(start, Outcome.Success);
 
             Initialize(start);
 
@@ -567,7 +626,11 @@ namespace MortgageInvestmentSimulator
             var end = MonthYear.Constrain(now.AddYears(Scenario.SimulationYears));
             while (now < end)
             {
+                result.TotalMonths++;
                 Simulate(now);
+                if (IsFinanciallySecure(now))
+                    result.FinanciallySecureMonths++;
+
                 Output.VerboseLine(GetOverview(now));
 
                 now = now.AddMonths(1);
@@ -577,12 +640,13 @@ namespace MortgageInvestmentSimulator
 
             CloseBooks(now);
 
-            Output.VerboseLine(GetStatus(now));
+            result.Status = GetStatus(now);
+            Output.VerboseLine(result.Status);
 
-            var netWorth = GetNetWorth(now);
+            result.NetWorth = GetNetWorth(now);
             Output.WriteLine($"{start} simulation succeeded with net worth of {GetNetWorth(now):C0} including a gain of {GetNetWorth(now) - ExternalCapital:C0} on {ExternalCapital:C0} committed");
 
-            return netWorth;
+            return result;
         }
 
         private bool ScroungeMoney(decimal amount, MonthYear now)
@@ -738,3 +802,5 @@ namespace MortgageInvestmentSimulator
         }
     }
 }
+
+// TODO: 

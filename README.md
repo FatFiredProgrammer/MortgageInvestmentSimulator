@@ -19,7 +19,7 @@ There are no secrets here.
 The data and the simulator itself are public knowledge.
 
 The simulator uses actual **historical market data** for the S&P 500 (price and dividend), 
-1 year US treasuries, and the average monthly mortgage interest rate. 
+1 year US treasuries, monthly inflation, and the average monthly mortgage interest rate. 
 The simulation runs starting each month from April 1972 until September 2013. 
 Buying/selling is done purely as needed (spot) with no attempt to guess the market.
 A small amount of cash is maintained and the remainder of the money is either invested in
@@ -29,6 +29,10 @@ The simulation makes attempts to include taxation.
 The simulation treats bond buying and selling in a very crude matter and does not include transaction fees or discounts.
 Essentially, this means all simulation can invest any funds at the 1 year US treasury rate.
 Stock buying and selling does not have transaction fees (yet).
+
+By default, the inflation adjusts the values at the start of each run for inflation.
+The simulation then adjusts the results to today's dollars. 
+This can be turned on and off.
 
 _It is likely there are still bugs in the simulator._ No program is without bugs.
 If you find problems, I will try to fix them and report data which is significantly mis-representative.
@@ -51,3 +55,4 @@ one pass tries to avoid or pay off a mortgage as soon as possible.
 * You can define various tax rates.
 * You can allow or disallow mortgage interest deductions.
 * You can set threshhold amounts for stock and bond purchases to prevent frequent trading - given there are no transaction fees.
+* You can control whether or not inflation adjustments are made.

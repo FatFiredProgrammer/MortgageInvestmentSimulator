@@ -20,7 +20,6 @@ namespace MortgageInvestmentSimulator
             if (other == null)
                 return;
 
-            AvoidMortgage = other.AvoidMortgage;
             Start = other.Start;
             End = other.End;
             Date = other.Date;
@@ -47,12 +46,6 @@ namespace MortgageInvestmentSimulator
         }
 
         /// <summary>
-        ///     Gets or sets a value indicating whether we should avoid mortgage and pay mortgage down when possible.
-        /// </summary>
-        /// <value><c>true</c> if avoid mortgage; otherwise, <c>false</c>.</value>
-        public bool AvoidMortgage { get; set; }
-
-        /// <summary>
         ///     The starting year of the simulation.
         /// </summary>
         /// <value>The start.</value>
@@ -76,7 +69,7 @@ namespace MortgageInvestmentSimulator
         ///     Gets or sets the number of years that any particular simulation runs.
         /// </summary>
         /// <value>The mortgage years.</value>
-        public int SimulationYears { get; set; } = 20;
+        public int SimulationYears { get; set; } = 15;
 
         /// <summary>
         ///     Gets or sets the cost of the home we have.
@@ -224,7 +217,6 @@ namespace MortgageInvestmentSimulator
             text.AppendLine(Date != null ? $"One simulation in {Date}" : $"Starts {Start} and ends {End}");
             text.AppendLine($"Each simulation is {SimulationYears} years");
             text.AppendLine($"Home value is {HomeValue:C0}");
-            text.AppendLine(AvoidMortgage ? "*Should avoid having a mortgage*" : "*Should invest money*");
             text.AppendLine($"Starting cash is {StartingCash:C0}");
             text.AppendLine($"Monthly income is {MonthlyIncome:C0}");
             text.AppendLine($"{MortgageTerm.GetYears()} year mortgage");
@@ -246,3 +238,4 @@ namespace MortgageInvestmentSimulator
         }
     }
 }
+// TODO: 

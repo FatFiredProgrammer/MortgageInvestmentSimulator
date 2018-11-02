@@ -12,59 +12,81 @@ namespace MortgageInvestmentSimulator
 
         public IOutput Output { get; }
 
-        public Result Run(Scenario scenario)
+        public Summary Run(Scenario scenario)
         {
+            if (scenario == null)
+                throw new ArgumentNullException(nameof(scenario));
+
+            scenario = new Scenario(scenario);
+
             Output.WriteLine("Mortgage vs Investment Simulator v1.0");
             Output.WriteLine(null);
             Output.WriteLine("Current Scenario:");
             Output.WriteLine(scenario.ToString());
 
-            var result = new Result
+            scenario.Start = MonthYear.Constrain(scenario.Date ?? scenario.Start);
+            scenario.End = MonthYear.Constrain(scenario.Date ?? scenario.End);
+
+            var simulator = new Simulator(Output);
+            var investing = simulator.Run(scenario, Strategy.Invest);
+            var avoidMortgage = simulator.Run(scenario, Strategy.AvoidMortgage);
+            return new Summary(investing, avoidMortgage)
             {
-                Start = MonthYear.Constrain(scenario.Date ?? scenario.Start),
-                End = MonthYear.Constrain(scenario.Date ?? scenario.End),
-                AvoidMortgage = scenario.AvoidMortgage,
+                Start = scenario.Start,
+                End = scenario.End,
             };
-            var now = result.Start;
-            while (now <= result.End)
+        }
+
+        private Results Run(Scenario scenario, Strategy strategy)
+        {
+            var results = new Results
             {
-                var simulation = new Simulation(scenario, Output);
+                Strategy = strategy,
+            };
+            var now = scenario.Start;
+            while (now <= scenario.End)
+            {
+                var simulation = new Simulation(scenario, strategy, Output);
                 try
                 {
-                    var netWorth = simulation.Run(now);
-                    result.NetWorths.Add(new MonthYear(now), netWorth);
-                    result.NetGains.Add(new MonthYear(now), netWorth - simulation.ExternalCapital);
-                    result.Success++;
+                    var result = simulation.Run(now);
+                    results.Add(result);
                 }
                 catch (SimulationInvalidException exception)
                 {
                     // This is a simulation where, for example, we simply don't make enough money to pay the mortgage
                     // on the first month. I.e. We should never be given a loan.
                     Output.WriteLine($"=== Simulation {now} invalid : {exception.Message} ===");
-                    result.Invalid++;
+                    results.Add(new Result(now, Outcome.Invalid));
                 }
                 catch (SimulationFailedException exception)
                 {
                     Output.WriteLine($"=== Simulation {now} failed {exception.When} : {exception.Message} ===");
                     Output.VerboseLine($"{exception.GetType()}: {exception.Message}");
-                    Output.WriteLine($"{simulation.GetStatus(exception.When)}");
-                    result.Errors.Add($"{now}: {exception.GetType()}: {exception.Message}{Environment.NewLine}{simulation.GetStatus(exception.When)}");
-                    result.Failed++;
+
+                    results.Add(new Result(now, Outcome.Failed)
+                    {
+                        Error = exception.Message,
+                        WhenError = exception.When,
+                        Status = simulation.GetStatus(exception.When)
+                    });
                 }
                 catch (Exception exception)
                 {
                     Output.WriteLine($"=== Simulation {now} failed : {exception.Message} ===");
                     Output.VerboseLine($"{exception.GetType()}: {exception.Message}");
-                    result.Errors.Add($"{now}: {exception.GetType()}: {exception.Message}");
-                    result.Failed++;
+                    results.Add(new Result(now, Outcome.Error)
+                    {
+                        Error = exception.Message,
+                    });
                     throw;
                 }
 
                 now = now.AddMonths(1);
             }
 
-            Output.WriteLine($"{result}");
-            return result;
+            Output.WriteLine($"{results}");
+            return results;
         }
     }
 }
