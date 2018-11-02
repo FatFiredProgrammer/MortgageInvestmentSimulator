@@ -56,3 +56,6 @@ one pass tries to avoid or pay off a mortgage as soon as possible.
 * You can allow or disallow mortgage interest deductions.
 * You can set threshhold amounts for stock and bond purchases to prevent frequent trading - given there are no transaction fees.
 * You can control whether or not inflation adjustments are made.
+* Monthly income can be fixed, fixed/inflation adjust, fixed/inflation adjusted monthly or equal to mortgage payment.
+* You can take money out at refinance in order to invest.
+* You can specify an extra amount to pay each month on the mortgage (if you have cash available).

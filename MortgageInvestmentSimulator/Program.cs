@@ -26,6 +26,8 @@ namespace MortgageInvestmentSimulator
                 MortgageTerm = MortgageTerm.ThirtyYear,
                 // OriginationFee = .0125,
                 ShouldPayOffHouseAtCompletion = false,
+                ExistingLoanYears = 20,
+                CashOutAtRefinance = true,
                 // AllowRefinance = false,
                 // AllowMortgageInterestDeduction = true,
             };
@@ -33,9 +35,9 @@ namespace MortgageInvestmentSimulator
             var verbose = args.Any(c => string.Equals(c, "-v", StringComparison.CurrentCultureIgnoreCase)) || args.Any(c => string.Equals(c, "--verbose", StringComparison.CurrentCultureIgnoreCase));
 #if DEBUG
 
-            // var output = verbose ? new VerboseOutput() : (IOutput)new DebugOutput();
+            var output = verbose ? new VerboseOutput() : (IOutput)new DebugOutput();
 
-            var output = verbose ? new VerboseOutput() : (IOutput)new ConsoleOutput();
+            //var output = verbose ? new VerboseOutput() : (IOutput)new ConsoleOutput();
 #else
             var output = verbose? new VerboseOutput() : (IOutput)new ConsoleOutput();
 #endif

@@ -13,7 +13,7 @@ namespace MortgageInvestmentSimulator
         public Simulation(Scenario scenario, Strategy strategy, IOutput output)
         {
             Output = output ?? throw new ArgumentNullException(nameof(output));
-            Scenario = new Scenario(scenario) ?? throw new ArgumentNullException(nameof(scenario));
+            Scenario = new Scenario(scenario);
             Strategy = strategy;
         }
 
@@ -194,12 +194,30 @@ namespace MortgageInvestmentSimulator
                 return;
 
             // Continuously changes with this option.
-            if(Scenario.ShouldAdjustMonthlyIncomeForInflation)
+            if (Scenario.MonthlyIncomeStrategy == MonthlyIncomeStrategy.FixedInflationAdjustedMonthly)
                 monthlyIncome = Inflation.Adjust(Scenario.MonthlyIncome, MonthYear.BaseLine, now);
 
             Output.VerboseLine($"Monthly income of {monthlyIncome:C0}");
             AdjustCash(monthlyIncome);
             ExternalCapital += monthlyIncome;
+        }
+
+        private void FakePayMortgage(int years)
+        {
+            for (var months = years * 12; months >= 0; --months)
+            {
+                if (Mortgage == null || Mortgage.Balance <= 0)
+                    break;
+
+                var interest = Mortgage.Balance * Mortgage.InterestRate / 12;
+                var principal = Mortgage.Payment - interest;
+                Mortgage.Balance -= principal;
+            }
+
+            if (Mortgage == null || Mortgage.Balance <= 0)
+                Mortgage = null;
+            if (Mortgage != null)
+                Output.VerboseLine($"Fake mortgage of {Mortgage}");
         }
 
         private decimal GetBondLiquidity(Treasury bond, MonthYear now)
@@ -310,46 +328,88 @@ namespace MortgageInvestmentSimulator
         {
             Output.VerboseLine("Starting simulation");
 
-            var homeValue = GetHomeValue(start);
-
-            if (Scenario.ShouldAdjustForInflation)
-            {
-                Cash = Inflation.Adjust(Scenario.StartingCash, MonthYear.BaseLine, start);
-                MonthlyIncome = Inflation.Adjust(Scenario.MonthlyIncome, MonthYear.BaseLine, start);
-            }
-            else
-            {
-                Cash = Scenario.StartingCash;
-                MonthlyIncome = Scenario.MonthlyIncome;
-            }
+            Cash = Scenario.ShouldAdjustForInflation ? Inflation.Adjust(Scenario.StartingCash, MonthYear.BaseLine, start) : Scenario.StartingCash;
 
             ExternalCapital += Scenario.StartingCash;
             MonthsUntilRebalance = Scenario.RebalanceMonths ?? 0;
-            if (Strategy == Strategy.AvoidMortgage)
-            {
-                // Buy house straight out
-                if (Cash >= homeValue)
-                {
-                    /* Nothing here - pay off later */
-                }
-                else
-                {
-                    // Pay what we can
-                    TakeOutMortgage(homeValue - Cash, start);
-                }
-            }
-            else
-            {
-                // Borrow as much as we can.
-                TakeOutMortgage(homeValue, start);
-            }
-
-            AdjustCash(-homeValue);
-
+            InitializeMortgage(start);
+            InitializeMonthlyIncome(start);
             if (Scenario.StartingCash <= 0)
             {
                 if (Mortgage != null && MonthlyIncome < Mortgage.Payment)
                     throw new SimulationInvalidException($"Monthly income of {MonthlyIncome:C0} is not enough to cover mortgage payment of {Mortgage.Payment:C0}");
+            }
+        }
+
+        private void InitializeMonthlyIncome(MonthYear start)
+        {
+            switch (Scenario.MonthlyIncomeStrategy)
+            {
+                case MonthlyIncomeStrategy.FixedInflationAdjusted:
+                    MonthlyIncome = Inflation.Adjust(Scenario.MonthlyIncome, MonthYear.BaseLine, start);
+                    Output.VerboseLine($"Monthly income is an inflation adjusted {MonthlyIncome:C0}");
+                    break;
+
+                case MonthlyIncomeStrategy.FixedInflationAdjustedMonthly:
+                    MonthlyIncome = Inflation.Adjust(Scenario.MonthlyIncome, MonthYear.BaseLine, start);
+                    Output.VerboseLine($"Monthly income is an inflation adjusted monthly starting at {MonthlyIncome:C0}");
+                    break;
+
+                case MonthlyIncomeStrategy.Fixed:
+                    MonthlyIncome = Scenario.MonthlyIncome;
+                    Output.VerboseLine($"Monthly income is fixed at {MonthlyIncome:C0}");
+                    break;
+
+                case MonthlyIncomeStrategy.Mortgage:
+
+                    // Add a dollar so we don't have some rounding failure.
+                    MonthlyIncome = (Mortgage?.Payment ?? Scenario.MonthlyIncome) + 1m;
+                    Output.VerboseLine($"Monthly income is equals monthly payment {MonthlyIncome:C0}");
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private void InitializeMortgage(MonthYear start)
+        {
+            var homeValue = GetHomeValue(start);
+
+            if (Scenario.ExistingLoanYears.HasValue)
+            {
+                // Assume an existing mortgage that doesn't cost us anything. 
+                // It simply exists.
+                var years = Scenario.MortgageTerm.GetYears();
+                var existingYears = Math.Max(1, Math.Min(Scenario.ExistingLoanYears.Value, years));
+                Output.VerboseLine($"Assuming a prior mortgage of {homeValue:C0} starting {existingYears:N0} years ago.");
+                Mortgage = TakeOutMortgage(homeValue, start.AddYears(-existingYears));
+                FakePayMortgage(existingYears);
+            }
+            else
+            {
+                if (Strategy == Strategy.AvoidMortgage)
+                {
+                    // Buy house straight out
+                    if (Cash >= homeValue)
+                    {
+                        /* Nothing here - pay off later */
+                    }
+                    else
+                    {
+                        // Pay what we can
+                        Mortgage = TakeOutMortgage(homeValue - Cash, start);
+                        AdjustCash(Mortgage?.Proceeds ?? 0m);
+                    }
+                }
+                else
+                {
+                    // Borrow as much as we can.
+                    Mortgage = TakeOutMortgage(homeValue, start);
+                    AdjustCash(Mortgage?.Proceeds ?? 0m);
+                }
+
+                AdjustCash(-homeValue);
             }
         }
 
@@ -405,9 +465,6 @@ namespace MortgageInvestmentSimulator
 
         private void PayDownHouse(MonthYear now)
         {
-            if (Strategy == Strategy.Invest)
-                return;
-
             CheckMortgageIsPaid();
             if (Mortgage == null)
                 return;
@@ -416,10 +473,13 @@ namespace MortgageInvestmentSimulator
             if (Cash <= 0)
                 return;
 
-            var principal = Math.Min(Mortgage.Balance, Cash).ToDollarCents();
-            AdjustCash(-principal);
-            Mortgage.Balance -= principal;
-            Output.VerboseLine($"Additional mortgage principal of {principal:C0}; remaining balance of {Mortgage.Balance:C0}");
+            var extraPrincipal = Strategy == Strategy.Invest ? Math.Min(Mortgage.Balance, Cash).ToDollarCents() : Scenario.ExtraPayment;
+            if (extraPrincipal <= 0)
+                return;
+
+            AdjustCash(-extraPrincipal);
+            Mortgage.Balance -= extraPrincipal;
+            Output.VerboseLine($"Additional mortgage principal of {extraPrincipal:C0}; remaining balance of {Mortgage.Balance:C0}");
         }
 
         private void PayMortgage(MonthYear now)
@@ -620,11 +680,23 @@ namespace MortgageInvestmentSimulator
             var mortgage = Mortgage;
             Mortgage = null;
 
+            var amount = mortgage.Balance;
+            if (Strategy == Strategy.Invest && Scenario.CashOutAtRefinance)
+            {
+                var homeValue = GetHomeValue(now);
+                if (homeValue > amount)
+                {
+                    Output.VerboseLine($"Taking {homeValue - amount:C0} extra cash out at refinance");
+                    amount = homeValue;
+                }
+            }
+
             Output.VerboseLine($"Refinancing {mortgage}");
-            TakeOutMortgage(mortgage.Balance, now);
+            Mortgage = TakeOutMortgage(amount, now);
+            AdjustCash(Mortgage?.Proceeds ?? 0m);
 
             // Must remember to pay off the old loan
-            AdjustCash(-mortgage.Balance);
+            AdjustCash(-mortgage?.Balance ?? 0m);
         }
 
         public Result Run(MonthYear start)
@@ -790,30 +862,28 @@ namespace MortgageInvestmentSimulator
             Rebalance(now);
         }
 
-        private void TakeOutMortgage(decimal amount, MonthYear start)
+        private Mortgage TakeOutMortgage(decimal amount, MonthYear start)
         {
-            if (Mortgage != null)
-                throw new InvalidOperationException("Mortgage != null");
-
             if (amount <= 0)
-                return;
+                return null;
 
             var rate = start < MonthYear.Min ? Scenario.MortgageInterestRate : MortgageInterestRates.GetRate(start, Scenario.MortgageTerm).InterestRate;
 
             var origination = amount * Math.Max(0, Scenario.OriginationFee);
             var amountOrigination = amount + origination;
             var years = Scenario.MortgageTerm.GetYears();
-            Mortgage = new Mortgage
+            var mortgage = new Mortgage
             {
                 Amount = amountOrigination,
                 Balance = amountOrigination,
                 Years = years,
                 InterestRate = rate,
                 Payment = PaymentCalculator.CalculatePayment(amountOrigination, rate, years),
+                Proceeds = amount
             };
-            AdjustCash(amount);
             Output.VerboseLine($"Take out {amount:C0} mortgage with {origination:C0} origination");
-            Output.VerboseLine($"{Mortgage}");
+            Output.VerboseLine($"{mortgage}");
+            return mortgage;
         }
     }
 }

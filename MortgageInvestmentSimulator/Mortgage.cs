@@ -32,6 +32,12 @@ namespace MortgageInvestmentSimulator
 
         public decimal Payment { get; set; }
 
+        /// <summary>
+        /// Gets or sets the amount you received from the loan.
+        /// </summary>
+        /// <value>The pay out.</value>
+        public decimal Proceeds { get; set; }
+
         /// <inheritdoc />
         public override string ToString()
             => $"{Amount:C0} mortgage for {Years} years @ {InterestRate:P2}; {Balance:C0} balance with {Payment:C0} payment";

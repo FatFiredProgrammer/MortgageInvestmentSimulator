@@ -28,15 +28,18 @@ namespace MortgageInvestmentSimulator
             HomeValue = other.HomeValue;
             MonthlyIncome = other.MonthlyIncome;
             StartingCash = other.StartingCash;
+            ExtraPayment = other.ExtraPayment;
             MortgageInterestRate = other.MortgageInterestRate;
             StockPercentage = other.StockPercentage;
             MortgageTerm = other.MortgageTerm;
             OriginationFee = other.OriginationFee;
             ShouldPayOffHouseAtCompletion = other.ShouldPayOffHouseAtCompletion;
             ShouldAdjustForInflation = other.ShouldAdjustForInflation;
-            ShouldAdjustMonthlyIncomeForInflation = other.ShouldAdjustMonthlyIncomeForInflation;
+            MonthlyIncomeStrategy = other.MonthlyIncomeStrategy;
             RebalanceMonths = other.RebalanceMonths;
             AllowRefinance = other.AllowRefinance;
+            CashOutAtRefinance = other.CashOutAtRefinance;
+            ExistingLoanYears = other.ExistingLoanYears;
             RefinancePayBackMonths = other.RefinancePayBackMonths;
             MarginalTaxRate = other.MarginalTaxRate;
             AllowMortgageInterestDeduction = other.AllowMortgageInterestDeduction;
@@ -87,11 +90,20 @@ namespace MortgageInvestmentSimulator
         /// <value>The monthly income.</value>
         public decimal MonthlyIncome { get; set; } = 1500;
 
+        public MonthlyIncomeStrategy MonthlyIncomeStrategy { get; set; }
+
         /// <summary>
         ///     Gets or sets the amount of cash we have at the start.
         /// </summary>
         /// <value>The monthly income.</value>
         public decimal StartingCash { get; set; } = 200000;
+
+        /// <summary>
+        ///     Gets or sets the extra payment an investor tries to pay.
+        ///     The non-investor always pays as much as he can.
+        /// </summary>
+        /// <value>The extra payment.</value>
+        public decimal ExtraPayment { get; set; }
 
         /// <summary>
         ///     Gets or sets the mortgage interest rate used when no other data is present.
@@ -132,8 +144,6 @@ namespace MortgageInvestmentSimulator
         /// <value><c>true</c> if should adjust for inflation; otherwise, <c>false</c>.</value>
         public bool ShouldAdjustForInflation { get; set; } = true;
 
-        public bool ShouldAdjustMonthlyIncomeForInflation { get; set; }
-
         /// <summary>
         ///     Gets or sets the number of months between re-balancing.
         /// </summary>
@@ -145,6 +155,20 @@ namespace MortgageInvestmentSimulator
         /// </summary>
         /// <value><c>true</c> if allow refinance; otherwise, <c>false</c>.</value>
         public bool AllowRefinance { get; set; } = true;
+
+        /// <summary>
+        ///     Gets or sets a value indicating whether cash out at refinance.
+        /// </summary>
+        /// <value><c>true</c> if [cash out at refinance]; otherwise, <c>false</c>.</value>
+        public bool CashOutAtRefinance { get; set; }
+
+        /// <summary>
+        /// Gets or sets the initial loan years.
+        /// If set, the simulation starts with a loan at the prevailing rate
+        /// which has been paid down for a number of years.
+        /// </summary>
+        /// <value>The initial loan years.</value>
+        public int? ExistingLoanYears { get; set; }
 
         /// <summary>
         ///     Gets or sets the refinance pay back months.
@@ -224,26 +248,25 @@ namespace MortgageInvestmentSimulator
             if (End < Start)
                 End = Start;
 
-            HomeValue = Math.Max(1, Math.Min(HomeValue, 10000000));
-            MonthlyIncome = Math.Max(0, Math.Min(MonthlyIncome, 100000));
-            StartingCash = Math.Max(0, Math.Min(StartingCash, 10000000));
+            HomeValue = Math.Max(1, Math.Min(HomeValue, 10000000)).ToDollarCents();
+            MonthlyIncome = Math.Max(0, Math.Min(MonthlyIncome, 100000)).ToDollarCents();
+            StartingCash = Math.Max(0, Math.Min(StartingCash, 10000000)).ToDollarCents();
+            ExtraPayment = Math.Max(0, Math.Min(ExtraPayment, 10000000)).ToDollarCents();
 
-            MortgageInterestRate = Math.Max(0.001m, Math.Min(MortgageInterestRate, 100m));
+            MortgageInterestRate = Math.Max(0.001m, Math.Min(MortgageInterestRate, 1m));
 
-            StockPercentage = Math.Max(0, Math.Min(StockPercentage, 1));
-            OriginationFee = Math.Max(0, Math.Min(OriginationFee, 1));
+            StockPercentage = Math.Max(0, Math.Min(StockPercentage, 1)).ToPercent();
+            OriginationFee = Math.Max(0, Math.Min(OriginationFee, 1)).ToPercent();
             if (RebalanceMonths.HasValue)
                 RebalanceMonths = Math.Max(1, Math.Min(RebalanceMonths.Value, 120));
             RefinancePayBackMonths = Math.Max(1, Math.Min(RefinancePayBackMonths, 360));
-            MarginalTaxRate = Math.Max(0, Math.Min(MarginalTaxRate, 1));
-            DividendTaxRate = Math.Max(0, Math.Min(DividendTaxRate, 1));
-            CapitalGainsTaxRate = Math.Max(0, Math.Min(CapitalGainsTaxRate, 1));
-            TreasuryInterestTaxRate = Math.Max(0, Math.Min(TreasuryInterestTaxRate, 1));
-            MinimumCash = Math.Max(1, Math.Min(MinimumCash, 10000000));
-            MinimumBond = Math.Max(1, Math.Min(MinimumBond, 10000000));
-            MinimumStock = Math.Max(1, Math.Min(MinimumStock, 10000000));
-            if (!ShouldAdjustForInflation)
-                ShouldAdjustMonthlyIncomeForInflation = false;
+            MarginalTaxRate = Math.Max(0, Math.Min(MarginalTaxRate, 1)).ToPercent();
+            DividendTaxRate = Math.Max(0, Math.Min(DividendTaxRate, 1)).ToPercent();
+            CapitalGainsTaxRate = Math.Max(0, Math.Min(CapitalGainsTaxRate, 1)).ToPercent();
+            TreasuryInterestTaxRate = Math.Max(0, Math.Min(TreasuryInterestTaxRate, 1)).ToPercent();
+            MinimumCash = Math.Max(1, Math.Min(MinimumCash, 10000000)).ToDollarCents();
+            MinimumBond = Math.Max(1, Math.Min(MinimumBond, 10000000)).ToDollarCents();
+            MinimumStock = Math.Max(1, Math.Min(MinimumStock, 10000000)).ToDollarCents();
         }
 
         public string GetSummary()
@@ -254,7 +277,7 @@ namespace MortgageInvestmentSimulator
             if (StartingCash > 0)
                 text.AppendLine($"Starting cash is {StartingCash:C0}");
             if (MonthlyIncome > 0)
-                text.AppendLine($"Monthly income is {MonthlyIncome:C0}");
+                text.AppendLine($"Monthly income is {MonthlyIncome:C0} with strategy of {MonthlyIncomeStrategy}");
             text.AppendLine($"{MortgageTerm.GetYears()} year mortgage");
             if (StockPercentage > 0)
                 text.AppendLine($"Invest {StockPercentage:P0} in stocks");
@@ -270,6 +293,7 @@ namespace MortgageInvestmentSimulator
             text.AppendLine($"Each simulation is {SimulationYears} years");
             text.AppendLine($"Home value is {HomeValue:C0}");
             text.AppendLine($"Starting cash is {StartingCash:C0}");
+            text.AppendLine($"Extra payment is {ExtraPayment:C0}");
             text.AppendLine($"Monthly income is {MonthlyIncome:C0}");
             text.AppendLine($"{MortgageTerm.GetYears()} year mortgage");
             text.AppendLine($"Default mortgage interest rate is {MortgageInterestRate:P2}");
@@ -277,12 +301,14 @@ namespace MortgageInvestmentSimulator
             text.AppendLine($"Invest {StockPercentage:P0} in stocks");
             text.AppendLine($"{(ShouldPayOffHouseAtCompletion ? "Must" : "Need not")} pay off house at end of simulation");
             text.AppendLine($"{(ShouldAdjustForInflation ? "Should" : "Should not")} adjust for inflation");
-            text.AppendLine($"{(ShouldAdjustMonthlyIncomeForInflation ? "Should" : "Should not")} adjust monthly for inflation");
+            text.AppendLine($"Monthly income strategy is {MonthlyIncomeStrategy}");
             text.AppendLine(AllowRefinance ? $"Allow mortgage refinance if costs recouped in {RefinancePayBackMonths} months" : "Do not allow mortgage refinancing");
+            text.AppendLine(CashOutAtRefinance ? "Allow cash out at refinance" : "Do not allow cash out at refinance");
+            text.AppendLine(ExistingLoanYears.HasValue ? $"Existing loan of {ExistingLoanYears.Value:N0} years" : "No existing loan");
             text.AppendLine($"{MinimumCash:C0} minimum cash to invest");
             text.AppendLine($"{MinimumStock:C0} minimum stock to invest");
             text.AppendLine($"{MinimumBond:C0} minimum bond to invest");
-            text.AppendLine(RebalanceMonths.HasValue ? $"Should rebalance portfolio every {RebalanceMonths} months" : "No rebalancing of portfolio");
+            text.AppendLine(RebalanceMonths.HasValue ? $"Should rebalance portfolio every {RebalanceMonths:N0} months" : "No rebalancing of portfolio");
             text.AppendLine($"{(AllowMortgageInterestDeduction ? "Allow" : "Do NOT allow")} mortgage interest deduction with a {MarginalTaxRate:P2} marginal tax rate");
             text.AppendLine($"{DividendTaxRate:P2} dividend tax rate");
             text.AppendLine($"{CapitalGainsTaxRate:P2} capital gains tax rate");
