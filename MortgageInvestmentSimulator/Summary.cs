@@ -24,6 +24,7 @@ namespace MortgageInvestmentSimulator
             public string FormattedUnits => string.IsNullOrWhiteSpace(Units) ? string.Empty : $" {Units}";
 
             public bool LargerIsBetter { get; set; } = true;
+
             public bool SmallerIsBetter
             {
                 get => !LargerIsBetter;
@@ -114,11 +115,13 @@ namespace MortgageInvestmentSimulator
 
             // Both are the same
             if (investValue == avoidMortgageValue)
+            {
                 return specification.IgnoreIfEqual
                            ? string.Empty
                            : $"Both {specification.Text} {Format(investValue, specification.FormatSpecifier)}{specification.FormattedUnits}.{Environment.NewLine}";
+            }
 
-            var investIsBetter = (specification.LargerIsBetter && investValue < avoidMortgageValue) || (!specification.LargerIsBetter && investValue < avoidMortgageValue);
+            var investIsBetter = (specification.LargerIsBetter && investValue > avoidMortgageValue) || (!specification.LargerIsBetter && investValue < avoidMortgageValue);
             var betterName = (investIsBetter ? Strategy.Invest : Strategy.AvoidMortgage).GetName();
             var betterValue = investIsBetter ? investValue : avoidMortgageValue;
             var worseValue = investIsBetter ? avoidMortgageValue : investValue;
@@ -140,13 +143,44 @@ namespace MortgageInvestmentSimulator
             text.AppendLine();
             text.AppendLine("# Elevator Speech");
             text.AppendLine();
-            var bothInvalidCount = BothInvalidCount;
 
+            var bothInvalidCount = BothInvalidCount;
             var count = Count - bothInvalidCount;
-            text.AppendLine($"{count:N0} {Scenario.SimulationYears}-year simulations each month from {Start} until {End}.");
             if (count <= 0)
                 return text.ToString();
 
+            var investIsBetter = CalculatePercent(Items.Count(c => c.InvestIsBetter), count);
+            var avoidMortgageIsBetter = CalculatePercent(Items.Count(c => c.AvoidMortgageIsBetter), count);
+            text.AppendLine(investIsBetter > avoidMortgageIsBetter
+                                ? $"{Strategy.Invest.GetName()} is better {investIsBetter:P02} of the time."
+                                : $"{Strategy.AvoidMortgage.GetName()} is better {avoidMortgageIsBetter:P02} of the time.");
+
+            text.Append(Show(
+                _invest.AverageNetWorth,
+                _avoidMortgage.AverageNetWorth,
+                new Specification
+                {
+                    Text = "generates",
+                    Superlative = "more average net worth",
+                    Units = "",
+                    LargerIsBetter = true,
+                    FormatSpecifier = "C0",
+                    IgnoreIfEqual = true,
+                }));
+            text.Append(Show(
+                _invest.MedianNetWorth,
+                _avoidMortgage.MedianNetWorth,
+                new Specification
+                {
+                    Text = "generates",
+                    Superlative = "more median net worth",
+                    Units = "",
+                    LargerIsBetter = true,
+                    FormatSpecifier = "C0",
+                    IgnoreIfEqual = true,
+                }));
+
+            text.AppendLine($"{count:N0} {Scenario.SimulationYears}-year simulations each month from {Start} until {End}.");
             var investSuccessPercent = CalculatePercent(Items.Count(c => c.InvestSuccess), count);
             var avoidMortgageSuccessPercent = CalculatePercent(Items.Count(c => c.AvoidMortgageSuccess), count);
             text.Append(Show(
@@ -185,20 +219,22 @@ namespace MortgageInvestmentSimulator
             var investAverageInterestRate = _invest.AverageInterestRate;
             if (investAverageInterestRate != 0)
             {
-                text.AppendLine($"{Strategy.Invest.GetName()} average interest rate {investAverageInterestRate:P2}.");
+                text.Append($"{Strategy.Invest.GetName()} average interest rate {investAverageInterestRate:P2}");
                 var investEffectiveAverageInterestRate = _invest.AverageEffectiveInterestRate;
                 if (investEffectiveAverageInterestRate != 0)
-                    text.AppendLine($"{Strategy.Invest.GetName()} average effective interest rate {investEffectiveAverageInterestRate:P2}.");
+                    text.Append($" ({investEffectiveAverageInterestRate:P2} effective rate)");
+                text.AppendLine(".");
             }
 
             var avoidMortgageAverageInterestRate = _avoidMortgage.AverageInterestRate;
             if (avoidMortgageAverageInterestRate != 0)
             {
-                text.AppendLine($"{Strategy.AvoidMortgage.GetName()} average interest rate {avoidMortgageAverageInterestRate:P2}.");
+                text.Append($"{Strategy.AvoidMortgage.GetName()} average interest rate {avoidMortgageAverageInterestRate:P2}.");
 
                 var avoidMortgageEffectiveAverageInterestRate = _avoidMortgage.AverageEffectiveInterestRate;
                 if (avoidMortgageEffectiveAverageInterestRate != 0)
-                    text.AppendLine($"{Strategy.AvoidMortgage.GetName()} average effective interest rate {avoidMortgageEffectiveAverageInterestRate:P2}.");
+                    text.Append($" ({avoidMortgageEffectiveAverageInterestRate:P2} effective rate)");
+                text.AppendLine(".");
             }
 
             var investAverageYearsUntilFinanciallySecure = _invest.AverageYearsUntilFinanciallySecure;
@@ -230,136 +266,13 @@ namespace MortgageInvestmentSimulator
                     IgnoreIfEqual = false,
                 }));
 
-            // TODO: Code needs work
-#if false
-years until paid off
-    Months
-
- Summary
-            //            text.AppendLine($"* {Strategy.Invest.GetName()}: {_invest.GetCounts()}");
-            //            text.AppendLine($"* {Strategy.AvoidMortgage.GetName()}: {_avoidMortgage.GetCounts()}");
-
-            *378 15 - year simulations monthly from April 1972 until September 2003
-                * Investing: 378 simulations; 353 Success(93.39 %); 25 Invalid(6.61 %)
-                * Avoiding Mortgage: 378 simulations; 353 Success(93.39 %); 25 Invalid(6.61 %)
-                * Investing and Avoiding Mortgage both were not successful 25 times
-                                                                              * Investing is better than Avoiding Mortgage 305 times(86.40 %)
-                * Avoiding Mortgage is better than Investing 48 times(13.60 %)
-                * Investing 353 successful simulations; $416,590 average net worth; $402,633 median net worth; 353 net gain simulations(100.00 %)
-                * Avoiding Mortgage 353 successful simulations; $349,861 average net worth; $325,098 median net worth; 353 net gain simulations(100.00 %)
-                * Average Net Worth: Investing is 19.07 % better than Avoiding Mortgage by $66,729 on average
-                *Median Net Worth: Investing is 23.85 % better than Avoiding Mortgage by $77,535 on average
-                *Investing worst result March 1994: $267,430
-                * Investing best result April 1985: $577,913
-                * Avoiding Mortgage worst result October 1987: $291,409
-                * Avoiding Mortgage best result April 1985: $577,913
-                * Financial Security: Avoiding Mortgage is 8.38 % better than Investing; Avoiding Mortgage 42.27 %; Investing 39.00 %
-                *Investing was financially secure 24,778 of 63,540 months; 39.00 %
-                *Avoiding Mortgage was financially secure 26,859 of 63,540 months; 42.27 %
-                *Financial Security Months: Avoiding Mortgage is 8.40 % better than Investing by 2,081 of 63,540 months 
-#endif
-
-            // TODO: Code needs work
-#if false
-                 text.AppendLine(null);
-
-            var nonFailed = Items.Count(c => c.NotFailed);
-            var bothFailed = Items.Count(c => c.BothFailed);
-            if (bothFailed > 0)
-                text.AppendLine($"* {Strategy.Invest.GetName()} and {Strategy.AvoidMortgage.GetName()} both were not successful {bothFailed:N0} times");
-
-            var investOnlyFailed = Items.Count(c => c.InvestOnlyFailed);
-            if (investOnlyFailed > 0)
-                text.AppendLine($"* {Strategy.Invest.GetName()} was not successful {investOnlyFailed:N0} times against {Strategy.AvoidMortgage.GetName()} failed");
-
-            var avoidMortgageOnlyFailed = Items.Count(c => c.AvoidMortgageOnlyFailed);
-            if (avoidMortgageOnlyFailed > 0)
-                text.AppendLine($"* {Strategy.AvoidMortgage.GetName()} was not successful {avoidMortgageOnlyFailed:N0} times against {Strategy.Invest.GetName()} failed");
-
-            var investIsBetter = Items.Count(c => c.InvestIsBetter);
-            if (investIsBetter > 0)
-                text.AppendLine($"* {Strategy.Invest.GetName()} is better than {Strategy.AvoidMortgage.GetName()} {investIsBetter:N0} times ({CalculatePercent(investIsBetter, nonFailed):P2})");
-
-            var avoidMortgageIsBetter = Items.Count(c => c.AvoidMortgageIsBetter);
-            if (avoidMortgageIsBetter > 0)
-            {
-                text.AppendLine(
-                    $"* {Strategy.AvoidMortgage.GetName()} is better than {Strategy.Invest.GetName()} {avoidMortgageIsBetter:N0} times ({CalculatePercent(avoidMortgageIsBetter, nonFailed):P2})");
-            }
-
-            text.AppendLine($"* {Strategy.Invest.GetName()} {_invest.GetStatistics()}");
-            text.AppendLine($"* {Strategy.AvoidMortgage.GetName()} {_avoidMortgage.GetStatistics()}");
-
-            text.AppendLine($"* Average Net Worth: {FormatDollarCents(_invest.AverageNetWorth, _avoidMortgage.AverageNetWorth)}");
-            text.AppendLine($"* Median Net Worth: {FormatDollarCents(_invest.MedianNetWorth, _avoidMortgage.MedianNetWorth)}");
-
-            var investWorst = _invest.FindWorst();
-            if (investWorst != null)
-                text.AppendLine($"* {Strategy.Invest.GetName()} worst result {investWorst}");
-            var investBest = _invest.FindBest();
-            if (investBest != null)
-                text.AppendLine($"* {Strategy.Invest.GetName()} best result {investBest}");
-            var avoidMortgageWorst = _avoidMortgage.FindWorst();
-            if (avoidMortgageWorst != null)
-                text.AppendLine($"* {Strategy.AvoidMortgage.GetName()} worst result {avoidMortgageWorst}");
-            var avoidMortgageBest = _avoidMortgage.FindBest();
-            if (avoidMortgageBest != null)
-                text.AppendLine($"* {Strategy.AvoidMortgage.GetName()} best result {investBest}");
-
-            text.AppendLine($"* Financial Security: {FormatPercent(_invest.FinanciallySecurePercent, _avoidMortgage.FinanciallySecurePercent)}");
-            text.AppendLine($"* {Strategy.Invest.GetName()} was financially secure {_invest.GetFinancialSecurity()}");
-            text.AppendLine($"* {Strategy.AvoidMortgage.GetName()} was financially secure {_avoidMortgage.GetFinancialSecurity()}");
-            var investFinanciallySecureMonths = _invest.FinanciallySecureMonths;
-            var investTotalMonths = _invest.TotalMonths;
-            var avoidMortgageFinanciallySecureMonths = _avoidMortgage.FinanciallySecureMonths;
-            var avoidMortgageTotalMonths = _avoidMortgage.TotalMonths;
-            if (investFinanciallySecureMonths != avoidMortgageFinanciallySecureMonths)
-            {
-                text.AppendLine(
-                    $"* Financial Security Months: {FormatValueLowest(investFinanciallySecureMonths, avoidMortgageFinanciallySecureMonths)} of {(investTotalMonths + avoidMortgageTotalMonths) / 2:N0} months");
-            }
-
-            if (Scenario.ShouldAdjustForInflation)
-            {
-                text.AppendLine(null);
-                text.AppendLine("All values are _inflation adjusted_ during the simulation.");
-                text.AppendLine("Results are always shown in today's dollars.");
-            }
-
-            text.AppendLine(null);
-            text.AppendLine("_Financial security_ security implies you either own your house or have sufficient assets that you could pay off your house if you wanted.");
-            text.AppendLine("Financial security is measured each month of the simulation.");
-            text.AppendLine("Financial security implies that there is **no** risk that you might lose your house that month.");
-
-            var invalid = Items.Count(c => c.InvestOutcome == Outcome.Invalid || c.AvoidMortgageOutcome == Outcome.Invalid);
-            if (invalid > 0)
-            {
-                text.AppendLine(null);
-                text.AppendLine("_Invalid_ results are obtained when the simulation is simply unable to purchase a house in any scenario.");
-                text.AppendLine("For example, a $1,000,000 house @ 12% interest when monthly income is $1,000.");
-                text.AppendLine("Neither investing nor avoiding a mortgage can resolve this.");
-            }
-
-            if (bothFailed > 0)
-            {
-                text.AppendLine(null);
-                text.AppendLine("_Both_ scenarios failing can also result from negative inflation adjusting your monthly income such that you can no longer afford your mortgage.");
-                text.AppendLine("This can be avoided by disabling inflation adjustment of monthly income.");
-            }
-
-            text.AppendLine(null);
-            text.AppendLine("# Scenario");
-            text.AppendLine(null);
-            text.AppendLine(GetScenario());
- 
-#endif
             text.AppendLine();
             text.AppendLine($"{Scenario.HomeValue:C0} home value.");
             if (Scenario.StartingCash > 0)
                 text.AppendLine($"{Scenario.StartingCash:C0} starting cash.");
             if (Scenario.MonthlyIncome > 0)
                 text.AppendLine($"{Scenario.MonthlyIncome:C0} monthly income with strategy of {Scenario.MonthlyIncomeStrategy}.");
-            text.AppendLine($"{Scenario.MortgageTerm.GetYears()} year mortgage with {Scenario.OriginationFee:P0} origination fee.");
+            text.AppendLine($"{Scenario.MortgageTerm.GetYears()} year mortgage with {Scenario.OriginationFee:P2} origination fee.");
             if (Scenario.ExtraPayment > 0)
                 text.AppendLine($"{Scenario.ExtraPayment:C0} payment per month.");
             if (Scenario.StockPercentage > 0)
@@ -376,108 +289,6 @@ years until paid off
                 text.AppendLine("Not adjusted for inflation.");
 
             return text.ToString().TrimEnd();
-#if false
-
-// TODO: Code needs work
-            var text = new StringBuilder();
-            text.AppendLine(null);
-            text.AppendLine("# Summary");
-            text.AppendLine(null);
-            text.AppendLine($"* {_summaries.Count} {Scenario.SimulationYears}-year simulations monthly from {Start} until {End}");
-            text.AppendLine($"* {Strategy.Invest.GetName()}: {_invest.GetCounts()}");
-            text.AppendLine($"* {Strategy.AvoidMortgage.GetName()}: {_avoidMortgage.GetCounts()}");
-
-            var nonFailed = Items.Count(c => c.NotFailed);
-            var bothFailed = Items.Count(c => c.BothFailed);
-            if (bothFailed > 0)
-                text.AppendLine($"* {Strategy.Invest.GetName()} and {Strategy.AvoidMortgage.GetName()} both were not successful {bothFailed:N0} times");
-
-            var investOnlyFailed = Items.Count(c => c.InvestOnlyFailed);
-            if (investOnlyFailed > 0)
-                text.AppendLine($"* {Strategy.Invest.GetName()} was not successful {investOnlyFailed:N0} times against {Strategy.AvoidMortgage.GetName()} failed");
-
-            var avoidMortgageOnlyFailed = Items.Count(c => c.AvoidMortgageOnlyFailed);
-            if (avoidMortgageOnlyFailed > 0)
-                text.AppendLine($"* {Strategy.AvoidMortgage.GetName()} was not successful {avoidMortgageOnlyFailed:N0} times against {Strategy.Invest.GetName()} failed");
-
-            var investIsBetter = Items.Count(c => c.InvestIsBetter);
-            if (investIsBetter > 0)
-                text.AppendLine($"* {Strategy.Invest.GetName()} is better than {Strategy.AvoidMortgage.GetName()} {investIsBetter:N0} times ({CalculatePercent(investIsBetter, nonFailed):P2})");
-
-            var avoidMortgageIsBetter = Items.Count(c => c.AvoidMortgageIsBetter);
-            if (avoidMortgageIsBetter > 0)
-            {
-                text.AppendLine(
-                    $"* {Strategy.AvoidMortgage.GetName()} is better than {Strategy.Invest.GetName()} {avoidMortgageIsBetter:N0} times ({CalculatePercent(avoidMortgageIsBetter, nonFailed):P2})");
-            }
-
-            text.AppendLine($"* {Strategy.Invest.GetName()} {_invest.GetStatistics()}");
-            text.AppendLine($"* {Strategy.AvoidMortgage.GetName()} {_avoidMortgage.GetStatistics()}");
-
-            text.AppendLine($"* Average Net Worth: {FormatDollarCents(_invest.AverageNetWorth, _avoidMortgage.AverageNetWorth)}");
-            text.AppendLine($"* Median Net Worth: {FormatDollarCents(_invest.MedianNetWorth, _avoidMortgage.MedianNetWorth)}");
-
-            var investWorst = _invest.FindWorst();
-            if (investWorst != null)
-                text.AppendLine($"* {Strategy.Invest.GetName()} worst result {investWorst}");
-            var investBest = _invest.FindBest();
-            if (investBest != null)
-                text.AppendLine($"* {Strategy.Invest.GetName()} best result {investBest}");
-            var avoidMortgageWorst = _avoidMortgage.FindWorst();
-            if (avoidMortgageWorst != null)
-                text.AppendLine($"* {Strategy.AvoidMortgage.GetName()} worst result {avoidMortgageWorst}");
-            var avoidMortgageBest = _avoidMortgage.FindBest();
-            if (avoidMortgageBest != null)
-                text.AppendLine($"* {Strategy.AvoidMortgage.GetName()} best result {investBest}");
-
-            text.AppendLine($"* Financial Security: {FormatPercent(_invest.FinanciallySecurePercent, _avoidMortgage.FinanciallySecurePercent)}");
-            text.AppendLine($"* {Strategy.Invest.GetName()} was financially secure {_invest.GetFinancialSecurity()}");
-            text.AppendLine($"* {Strategy.AvoidMortgage.GetName()} was financially secure {_avoidMortgage.GetFinancialSecurity()}");
-            var investFinanciallySecureMonths = _invest.FinanciallySecureMonths;
-            var investTotalMonths = _invest.TotalMonths;
-            var avoidMortgageFinanciallySecureMonths = _avoidMortgage.FinanciallySecureMonths;
-            var avoidMortgageTotalMonths = _avoidMortgage.TotalMonths;
-            if (investFinanciallySecureMonths != avoidMortgageFinanciallySecureMonths)
-            {
-                text.AppendLine(
-                    $"* Financial Security Months: {FormatValueLowest(investFinanciallySecureMonths, avoidMortgageFinanciallySecureMonths)} of {(investTotalMonths + avoidMortgageTotalMonths) / 2:N0} months");
-            }
-
-            if (Scenario.ShouldAdjustForInflation)
-            {
-                text.AppendLine(null);
-                text.AppendLine("All values are _inflation adjusted_ during the simulation.");
-                text.AppendLine("Results are always shown in today's dollars.");
-            }
-
-            text.AppendLine(null);
-            text.AppendLine("_Financial security_ security implies you either own your house or have sufficient assets that you could pay off your house if you wanted.");
-            text.AppendLine("Financial security is measured each month of the simulation.");
-            text.AppendLine("Financial security implies that there is **no** risk that you might lose your house that month.");
-
-            var invalid = Items.Count(c => c.InvestOutcome == Outcome.Invalid || c.AvoidMortgageOutcome == Outcome.Invalid);
-            if (invalid > 0)
-            {
-                text.AppendLine(null);
-                text.AppendLine("_Invalid_ results are obtained when the simulation is simply unable to purchase a house in any scenario.");
-                text.AppendLine("For example, a $1,000,000 house @ 12% interest when monthly income is $1,000.");
-                text.AppendLine("Neither investing nor avoiding a mortgage can resolve this.");
-            }
-
-            if (bothFailed > 0)
-            {
-                text.AppendLine(null);
-                text.AppendLine("_Both_ scenarios failing can also result from negative inflation adjusting your monthly income such that you can no longer afford your mortgage.");
-                text.AppendLine("This can be avoided by disabling inflation adjustment of monthly income.");
-            }
-
-            text.AppendLine(null);
-            text.AppendLine("# Scenario");
-            text.AppendLine(null);
-            text.AppendLine(GetScenario());
-
-            return text.ToString().TrimEnd();
-#endif
         }
     }
 }
