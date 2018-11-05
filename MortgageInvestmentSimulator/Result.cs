@@ -56,6 +56,10 @@ namespace MortgageInvestmentSimulator
 
         public decimal YearsUntilFinanciallySecure => FinanciallySecure ? MonthYear.MonthDifference(FinanciallySecureMonthYear, Start) / 12 : 0;
 
+        public decimal AverageMortgageInterestRateGreaterThanTreasury { get; set; }
+
+        public decimal AverageEffectiveMortgageInterestRateGreaterThanTreasury { get; set; }
+
         public string Status { get; set; }
 
         /// <inheritdoc />

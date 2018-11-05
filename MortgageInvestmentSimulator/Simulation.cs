@@ -80,6 +80,12 @@ namespace MortgageInvestmentSimulator
         /// <value>The external capital.</value>
         public decimal ExternalCapital { get; set; }
 
+        public decimal AverageMortgageInterestRate 
+            => (MortgageInterest / (MortgageDollarMonths / 12)).ToPercent();
+
+        public decimal AverageEffectiveMortgageInterestRate 
+            => MortgageInterestDeductions != 0 ? ((MortgageInterest - MortgageInterestDeductions) / (MortgageDollarMonths / 12)).ToPercent() : 0;
+
         private void AdjustCash(decimal amount, MonthYear now)
         {
             amount = amount.ToDollarCents();
@@ -764,6 +770,12 @@ namespace MortgageInvestmentSimulator
                         result.FinanciallySecureMonthYear = new MonthYear(now);
                 }
 
+                var treasuryRate = TreasuryInterestRates.GetRate(now).InterestRate;
+                if (AverageMortgageInterestRate > treasuryRate)
+                    result.AverageMortgageInterestRateGreaterThanTreasury++;
+                if (AverageEffectiveMortgageInterestRate > treasuryRate)
+                    result.AverageEffectiveMortgageInterestRateGreaterThanTreasury++;
+
                 Output.VerboseLine(GetOverview(now));
 
                 now = now.AddMonths(1);
@@ -771,9 +783,8 @@ namespace MortgageInvestmentSimulator
 
             if (MortgageDollarMonths > 0)
             {
-                result.AverageMortgageInterestRate = (MortgageInterest / (MortgageDollarMonths / 12)).ToPercent();
-                if (MortgageInterestDeductions != 0)
-                    result.AverageEffectiveMortgageInterestRate = ((MortgageInterest - MortgageInterestDeductions) / (MortgageDollarMonths / 12)).ToPercent();
+                result.AverageMortgageInterestRate = AverageMortgageInterestRate;
+                result.AverageEffectiveMortgageInterestRate = AverageEffectiveMortgageInterestRate;
             }
 
             Output.VerboseLine($"===== {now}: Simulation ended");

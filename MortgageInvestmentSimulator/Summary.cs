@@ -15,11 +15,11 @@ namespace MortgageInvestmentSimulator
         {
             public string Text { get; set; }
 
-            public string Superlative { get; set; } = "better";
+            public string Superlative { private get; set; } = "better";
 
             public string FormattedSuperlative => string.IsNullOrWhiteSpace(Superlative) ? string.Empty : $" {Superlative}";
 
-            public string Units { get; set; }
+            public string Units { private get; set; }
 
             public string FormattedUnits => string.IsNullOrWhiteSpace(Units) ? string.Empty : $" {Units}";
 
@@ -27,7 +27,6 @@ namespace MortgageInvestmentSimulator
 
             public bool SmallerIsBetter
             {
-                get => !LargerIsBetter;
                 set => LargerIsBetter = false;
             }
 
@@ -152,15 +151,15 @@ namespace MortgageInvestmentSimulator
             var investIsBetter = CalculatePercent(Items.Count(c => c.InvestIsBetter), count);
             var avoidMortgageIsBetter = CalculatePercent(Items.Count(c => c.AvoidMortgageIsBetter), count);
             text.AppendLine(investIsBetter > avoidMortgageIsBetter
-                                ? $"{Strategy.Invest.GetName()} is better {investIsBetter:P02} of the time."
-                                : $"{Strategy.AvoidMortgage.GetName()} is better {avoidMortgageIsBetter:P02} of the time.");
+                                ? $"{Strategy.Invest.GetName()} was better {investIsBetter:P02} of the time."
+                                : $"{Strategy.AvoidMortgage.GetName()} was better {avoidMortgageIsBetter:P02} of the time.");
 
             text.Append(Show(
                 _invest.AverageNetWorth,
                 _avoidMortgage.AverageNetWorth,
                 new Specification
                 {
-                    Text = "generates",
+                    Text = "generated",
                     Superlative = "more average net worth",
                     Units = "",
                     LargerIsBetter = true,
@@ -172,7 +171,7 @@ namespace MortgageInvestmentSimulator
                 _avoidMortgage.MedianNetWorth,
                 new Specification
                 {
-                    Text = "generates",
+                    Text = "generated",
                     Superlative = "more median net worth",
                     Units = "",
                     LargerIsBetter = true,
