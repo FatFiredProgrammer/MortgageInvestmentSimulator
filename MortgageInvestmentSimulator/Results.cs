@@ -32,14 +32,16 @@ namespace MortgageInvestmentSimulator
 
         public IEnumerable<Result> Items => _results.Values;
 
+        public int Count => _results.Count;
+
         public int TotalMonths
         {
-            get { return Items.Where(c => c.Outcome == Outcome.Success || c.Outcome == Outcome.Failed).Sum(c => c.TotalMonths); }
+            get { return Items.Where(c => c.Valid).Sum(c => c.TotalMonths); }
         }
 
         public int FinanciallySecureMonths
         {
-            get { return Items.Where(c => c.Outcome == Outcome.Success || c.Outcome == Outcome.Failed).Sum(c => c.FinanciallySecureMonths); }
+            get { return Items.Where(c => c.Valid).Sum(c => c.FinanciallySecureMonths); }
         }
 
         public decimal FinanciallySecurePercent
@@ -52,18 +54,16 @@ namespace MortgageInvestmentSimulator
             }
         }
 
-        public int Count => _results.Count;
-
         public decimal AverageNetWorth
         {
             get
             {
-                var list = Items.Where(c => c.Outcome == Outcome.Success).ToList();
+                var list = Items.Where(c => c.Success).ToList();
                 if (list.Count == 0)
                     return 0;
 
                 var netWorths = list.Select(c => c.NetWorth).ToList();
-                var average = netWorths.GetAverage();
+                var average = netWorths.GetAverage().ToDollarCents();
                 return average;
             }
         }
@@ -72,12 +72,12 @@ namespace MortgageInvestmentSimulator
         {
             get
             {
-                var list = Items.Where(c => c.Outcome == Outcome.Success).ToList();
+                var list = Items.Where(c => c.Success).ToList();
                 if (list.Count == 0)
                     return 0;
 
                 var netWorths = list.Select(c => c.NetWorth).ToList();
-                var median = netWorths.GetMedian();
+                var median = netWorths.GetMedian().ToDollarCents();
                 return median;
             }
         }
@@ -86,7 +86,7 @@ namespace MortgageInvestmentSimulator
         {
             get
             {
-                var list = Items.Where(c => c.Outcome == Outcome.Success).ToList();
+                var list = Items.Where(c => c.Success).ToList();
                 if (list.Count == 0)
                     return 0;
 
@@ -99,13 +99,28 @@ namespace MortgageInvestmentSimulator
         {
             get
             {
-                var list = Items.Where(c => c.Outcome == Outcome.Success).ToList();
+                var list = Items.Where(c => c.Success).ToList();
                 if (list.Count == 0)
                     return 0;
 
                 var count = list.Count(c => c.NetWorth > 0);
                 return count;
             }
+        }
+
+        public decimal AverageInterestRate
+        {
+            get { return Items.Where(c => c.AverageMortgageInterestRate != 0).Select(c => c.AverageMortgageInterestRate).GetAverage().ToPercent(); }
+        }
+
+        public decimal AverageEffectiveInterestRate
+        {
+            get { return Items.Where(c => c.AverageEffectiveMortgageInterestRate != 0).Select(c => c.AverageEffectiveMortgageInterestRate).GetAverage().ToPercent(); }
+        }
+
+        public decimal AverageYearsUntilFinanciallySecure
+        {
+            get { return Items.Where(c => c.FinanciallySecure).Select(c => c.YearsUntilFinanciallySecure).GetAverage().ToValue(); }
         }
 
         public void Add(Result result)
@@ -121,7 +136,7 @@ namespace MortgageInvestmentSimulator
             Result best = null;
             foreach (var item in Items)
             {
-                if (item.Outcome != Outcome.Success)
+                if (!item.Success)
                     continue;
 
                 if (best == null)
@@ -138,7 +153,7 @@ namespace MortgageInvestmentSimulator
             Result worst = null;
             foreach (var item in Items)
             {
-                if (item.Outcome != Outcome.Success)
+                if (!item.Success)
                     continue;
 
                 if (worst == null)
@@ -191,7 +206,7 @@ namespace MortgageInvestmentSimulator
             text.Append($"; {AverageNetWorth:C0} average net worth");
             text.Append($"; {MedianNetWorth:C0} median net worth");
             var netLossCount = NetLossCount;
-            if(netLossCount > 0)
+            if (netLossCount > 0)
                 text.Append($"; {NetLossCount:N0} net loss simulations ({((decimal)netLossCount / list.Count).ToPercent():P2})");
             var netGainCount = NetGainCount;
             if (netGainCount > 0)

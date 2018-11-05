@@ -31,6 +31,12 @@ namespace MortgageInvestmentSimulator
 
         public decimal MonthlyIncome { get; private set; }
 
+        public decimal MortgageDollarMonths { get; private set; }
+
+        public decimal MortgageInterest { get; private set; }
+
+        public decimal MortgageInterestDeductions { get; private set; }
+
         /// <summary>
         ///     Gets or sets the mortgage if we have one..
         /// </summary>
@@ -309,11 +315,15 @@ namespace MortgageInvestmentSimulator
 
         private decimal GetStockLiquidity(Sp500 stock, MonthYear now)
         {
+            // Get current stock value
             var current = stock.GetValue(now);
+
+            // Calculate net gain by subtracting basis from current value
             var net = current - (stock.BasisPrice * stock.Shares);
             if (net <= 0)
                 return 0;
 
+            // Return the current value minus the net gain times capital gains tax rate.
             return (current - net * Scenario.CapitalGainsTaxRate);
         }
 
@@ -478,6 +488,7 @@ namespace MortgageInvestmentSimulator
                 return;
 
             AdjustCash(valueOfDeduction, now);
+            MortgageInterestDeductions += valueOfDeduction;
             Output.VerboseLine($"Claimed a mortgage interest deduction worth {valueOfDeduction:C0}");
         }
 
@@ -516,6 +527,8 @@ namespace MortgageInvestmentSimulator
 
             var interest = Mortgage.Balance * Mortgage.InterestRate / 12;
             CurrentTaxes.MortgageInterest += interest;
+            MortgageInterest += interest;
+            MortgageDollarMonths += Mortgage.Balance;
 
             if (interest > Mortgage.Payment)
             {
@@ -731,28 +744,36 @@ namespace MortgageInvestmentSimulator
             Output.VerboseLine(null);
             Output.VerboseLine($"===== {start} Simulation ===== ");
 
-            var result = new Result(start, Outcome.Success);
-
-            Initialize(start);
-
             var now = MonthYear.Constrain(start);
             var end = MonthYear.Constrain(now.AddYears(Scenario.SimulationYears));
+            Initialize(start);
+
+            var result = new Result(start, Outcome.Success)
+            {
+                Months = MonthYear.MonthDifference(start, end),
+            };
+
             while (now < end)
             {
                 result.TotalMonths++;
                 Simulate(now);
                 if (IsFinanciallySecure(now))
-                    result.FinanciallySecureMonths++;
-                else
                 {
-                    IsFinanciallySecure(now);
-                    Debug.WriteLine("ASDASD");
-
+                    result.FinanciallySecureMonths++;
+                    if (result.FinanciallySecureMonthYear == null)
+                        result.FinanciallySecureMonthYear = new MonthYear(now);
                 }
 
                 Output.VerboseLine(GetOverview(now));
 
                 now = now.AddMonths(1);
+            }
+
+            if (MortgageDollarMonths > 0)
+            {
+                result.AverageMortgageInterestRate = (MortgageInterest / (MortgageDollarMonths / 12)).ToPercent();
+                if (MortgageInterestDeductions != 0)
+                    result.AverageEffectiveMortgageInterestRate = ((MortgageInterest - MortgageInterestDeductions) / (MortgageDollarMonths / 12)).ToPercent();
             }
 
             Output.VerboseLine($"===== {now}: Simulation ended");

@@ -9,7 +9,7 @@ namespace MortgageInvestmentSimulator
             switch (strategy)
             {
                 case Strategy.AvoidMortgage:
-                    return "Avoiding Mortgage";
+                    return "Avoiding-Mortgage";
 
                 case Strategy.Invest:
                     return "Investing";

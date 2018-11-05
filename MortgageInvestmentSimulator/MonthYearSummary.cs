@@ -26,9 +26,19 @@ namespace MortgageInvestmentSimulator
 
         public bool BothFailed => InvestOutcome != Outcome.Success && AvoidMortgageOutcome != Outcome.Success;
 
+        public bool BothInvalid => InvestOutcome == Outcome.Invalid && AvoidMortgageOutcome == Outcome.Invalid;
+
         public bool InvestOnlyFailed => InvestOutcome != Outcome.Success && AvoidMortgageOutcome == Outcome.Success;
 
         public bool AvoidMortgageOnlyFailed => InvestOutcome == Outcome.Success && AvoidMortgageOutcome != Outcome.Success;
+
+        public bool InvestSuccess => InvestOutcome == Outcome.Success;
+
+        public bool AvoidMortgageSuccess => AvoidMortgageOutcome == Outcome.Success;
+
+        public bool InvestNotSuccess => InvestOutcome != Outcome.Success;
+
+        public bool AvoidMortgageNotSuccess => AvoidMortgageOutcome != Outcome.Success;
 
         public bool InvestIsBetter
         {
