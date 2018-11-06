@@ -160,7 +160,7 @@ namespace MortgageInvestmentSimulator
         ///     Gets or sets a value indicating whether cash out at refinance.
         /// </summary>
         /// <value><c>true</c> if [cash out at refinance]; otherwise, <c>false</c>.</value>
-        public bool CashOutAtRefinance { get; set; }
+        public bool CashOutAtRefinance { get; set; } = false;
 
         /// <summary>
         /// Gets or sets the initial loan years.
