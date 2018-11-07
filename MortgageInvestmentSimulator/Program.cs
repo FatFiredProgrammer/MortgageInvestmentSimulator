@@ -23,18 +23,19 @@ namespace MortgageInvestmentSimulator
                 HomeValue = 200000,
                 MonthlyIncome = 2500,
                 //StartingCash = 200000,
-                StockPercentage = 1.0m,
+                StockPercentage = .8m,
+
                 //MortgageTerm = MortgageTerm.FifteenYear,
                 //OriginationFee = .0125,
                 // ShouldPayOffHouseAtCompletion = true,
                 //ExistingLoanYears = 20,
                 //CashOutAtRefinance = true,
                 //AllowRefinance = false,
-                // AllowMortgageInterestDeduction = false,
+                AllowMortgageInterestDeduction = false,
                 // AllowRefinance = false,
                 MonthlyIncomeStrategy = MonthlyIncomeStrategy.MortgagePlus50Percent,
                 //ShouldAdjustForInflation = true,
-                ExtraPayment = 400,
+                // ExtraPayment = 400,
 
             };
 
